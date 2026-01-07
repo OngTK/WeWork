@@ -1,0 +1,61 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.9'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.wework'        // origin : org.example >> 프로젝트 명에 맞게 변환
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'           // ✅ Spring Web
+    
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'      // ✅ Spring Boot Actuator : 로그·모니터링
+    implementation 'org.springframework.boot:spring-boot-starter-validation'    // ✅ Validation : DTO 검증 / @NotNull, @NotBlack, @Size 등
+    implementation 'org.springframework.boot:spring-boot-starter-security'      // ✅ Spring Security
+
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    // ✅ Thymeleaf
+    // React 전후로 API 서버 전용 or 관리자 페이지 등으로만 사용
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'      // ✅ Spring Data JPA
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.5'  // ✅ MyBatis Framework
+
+    // thymeleaf security extras는 필요할 때만 + 버전은 보통 생략 권장
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+
+    // ✅ Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    // - Getter Setter Builder Slf4j 등 제공
+
+    // ✅ Spring Boot DevTools
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'             
+    // - 서버 자동 재시작 / 개발 생산성 향상 / 운영 배포 시 자동 제외
+    
+
+    // ✅ DB Driver 
+    runtimeOnly 'com.mysql:mysql-connector-j'           // ✅ MySQL
+    // runtimeOnly 'com.oracle.database.jdbc:ojdbc11'   // ✅ Oracle : 추후 MySQL을 Oracle로 마이그레이션 예정
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'     // ✅ 테스트는 이걸로 통합
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.5'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+}
