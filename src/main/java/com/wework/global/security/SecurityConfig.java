@@ -1,4 +1,4 @@
-package com.wework.config;
+package com.wework.global.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

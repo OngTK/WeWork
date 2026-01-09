@@ -30,6 +30,8 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'      // ✅ Spring Data JPA
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.5'  // ✅ MyBatis Framework
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'    // ✅ Redis
+    implementation "org.springframework.session:spring-session-data-redis"      // ✅ Redis session
 
     // thymeleaf security extras는 필요할 때만 + 버전은 보통 생략 권장
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
@@ -54,6 +56,11 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.5'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // ✅ JJWT (JWT 발급/검증)
+    implementation "io.jsonwebtoken:jjwt-api:0.12.6"
+    runtimeOnly  "io.jsonwebtoken:jjwt-impl:0.12.6"
+    runtimeOnly  "io.jsonwebtoken:jjwt-jackson:0.12.6"
 }
 
 test {

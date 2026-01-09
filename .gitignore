@@ -43,4 +43,4 @@ bin/
 
 ### 설정파일 ###
 application.yml
-application-dev.yml
+.yml
