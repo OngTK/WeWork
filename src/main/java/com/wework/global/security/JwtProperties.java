@@ -33,5 +33,5 @@ public record JwtProperties(
         /* Access Token의 만료 시간(초 단위) */
         long accessExpSeconds,
         /* Refresh Token의 만료 시간(초 단위) */
-        long refreshexpSeconds
+        long refreshExpSeconds
 ) {}
