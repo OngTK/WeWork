@@ -3,6 +3,7 @@ package com.wework.auth.api;
 import com.wework.auth.dto.request.LoginRequestDto;
 import com.wework.auth.service.AuthService;
 import com.wework.global.util.CookieUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +59,54 @@ public class AuthController {
                 "/"
         );
         // [3] AccessToken은 JSON Body로 반환 (프론트는 Authorization 헤더에 실어 사용)
+        return ResponseEntity.ok(result.body());
+    } // func end
+
+    /**
+     * [AUTH_012] 토큰 재발급 (Reissue Token API)
+     *
+     * <p>HTTP Only Cookie에 저장된 Refresh Token 기반으로
+     * <p>새로운 Access Token을 재발급(reissue)하는 엔드포인트.
+     *
+     * <p>✔ 클라이언트는 Request 헤더가 아닌,
+     * <p>  Cookie(refreshToken)로 Refresh Token을 전송한다.
+     * <p>✔ 서버에서는 Redis에 저장된 Refresh Token과 비교해 유효성 검증을 수행한다.
+     * <p>✔ (권장 보안패턴) Refresh Rotation 적용:
+     * <p>    - Refresh Token을 사용할 때마다 새 RT를 재발급하고
+     * <p>      이전 RT는 Redis에서 제거 또는 블랙리스트 처리.
+     *
+     */
+    @PostMapping("/token")
+    public ResponseEntity<?> reissueToken(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ){
+        // [1] Refresh Token을 HttpOnly Cookie에서 추출
+        // - 쿠키가 없거나 이름이 다르면 IllegalArgumentException 발생
+        String refreshToken = CookieUtil.getCookieValue(request, "refreshToken")
+                .orElseThrow(() -> new IllegalArgumentException("Refresh cookie not found"));
+
+        // [2] 토큰 재발급 처리
+        // - refreshToken 유효성 검증 (Redis 조회)
+        // - Refresh Rotation 적용 시 새 RT 및 AT 생성
+        // - 재발급 AccessToken + 새 RefreshToken + 만료시간 반환
+        AuthService.ReissueResult result = authService.reissueToken(refreshToken);
+
+        // [3] 새 Refresh Token으로 쿠키 갱신
+        // - HttpOnly + Secure(false: local) + SameSite=Lax
+        // - 운영 환경에서는 secure=true, SameSite=None 권장
+        CookieUtil.addHttpOnlyCookie(
+                response,
+                "refreshToken",
+                result.refreshToken(),      // 재발급된 Refresh Token
+                result.refreshTtlSeconds(), // 새 TTL
+                false,                      // 로컬 환경이므로 secure=false
+                "Lax",
+                "/"
+        );
+
+        // [4] Access Token은 JSON Body로 반환
+        // - 프론트는 Authorization 헤더로 설정하여 사용
         return ResponseEntity.ok(result.body());
     } // func end
 

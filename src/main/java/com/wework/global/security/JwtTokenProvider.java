@@ -46,6 +46,12 @@ public class JwtTokenProvider {
     } // func end
 
     /**
+     * Token의 메타 정보를 반환하기 위한 record
+     * */
+    public record TokenWithMeta(String token, String jti, long ttlSeconds) {}
+
+
+    /**
      * AccessToken 생성.
      *
      * @param empId    사번(주체 subject 값으로 저장)
@@ -83,7 +89,7 @@ public class JwtTokenProvider {
                 .compact();                           // JWT 문자열 생성
 
         // [5] 토큰 + 메타 정보 반환
-        return new TokenWithMeta(token, jti, props.refreshExpSeconds());
+        return new TokenWithMeta(token, jti, props.accessExpSeconds());
     } // func end
 
     /**
@@ -208,6 +214,52 @@ public class JwtTokenProvider {
         return v == null ? null : String.valueOf(v);
     } // func end
 
-    public record TokenWithMeta(String token, String jti, long ttlSeconds) {}
+    /**
+     * 토큰의 typ(type) 값을 추출.
+     *
+     * <p>
+     * typ는 Access Token / Refresh Token을 구분하기 위해
+     * createAccessToken(), createRefreshToken() 생성 시
+     * 커스텀 claim("typ")으로 저장해 둔 값이다.
+     * </p>
+     *
+     * <p>
+     * 예:
+     * <ul>
+     *   <li>Access Token → "Access"</li>
+     *   <li>Refresh Token → "Refresh"</li>
+     * </ul>
+     * </p>
+     *
+     * @param token JWT 문자열
+     * @return typ 값 ("AT" / "RT"), 없으면 null
+     */
+    public String getType(String token){
+        // 커스텀 claim typ 읽기
+        Object v = parse(token).getPayload().get("typ");
+        return v == null ? null : String.valueOf(v);
+    } // func end
 
+
+    /**
+     * JWT의 JTI(JWT ID)를 추출.
+     *
+     * <p>
+     * jti는 JWT 표준 claim 중 하나이며,
+     * 토큰 고유 식별값(Unique Identifier)을 나타낸다.
+     * </p>
+     *
+     * <p>
+     * 서버(또는 Redis)에서 Refresh Token 또는 Access Token을
+     * 개별적으로 관리(무효화 / 재발급 / 블랙리스트 등록)할 때 사용한다.
+     * </p>
+     *
+     * @param token JWT 문자열
+     * @return jti 값(문자열)
+     */
+    public String getJti(String token){
+        // Claims#getId() → 표준 claim "jti" 반환
+        Claims claims = parse(token).getPayload();
+        return claims.getId();
+    } // func end
 } // class end

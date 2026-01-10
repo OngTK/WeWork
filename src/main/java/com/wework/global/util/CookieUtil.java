@@ -1,7 +1,12 @@
 package com.wework.global.util;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseCookie;
+
+import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * Cookie 생성 및 삭제를 위한 유틸리티 클래스.
@@ -58,7 +63,7 @@ public class CookieUtil {
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
-    }
+    } // func end
 
     /**
      * 쿠키 삭제 메서드.
@@ -78,5 +83,35 @@ public class CookieUtil {
             String path
     ){
         addHttpOnlyCookie(response, name, "", 0, secure, sameSite, path);
-    }
-}
+    } // func end
+
+    /**
+     * RefreshToken 등 특정 이름의 Cookie 값을 읽어오는 유틸리티 메서드.
+     *
+     * <p>
+     * HttpServletRequest 에 포함된 Cookie 배열에서
+     * name과 일치하는 Cookie를 찾아 그 값을 반환한다.
+     * </p>
+     *
+     * @param request HttpServletRequest (클라이언트 요청)
+     * @param name    찾고자 하는 쿠키 이름
+     * @return        쿠키 값(Optional) — 존재하지 않으면 Optional.empty()
+     */
+    public static Optional<String> getCookieValue(HttpServletRequest request, String name) {
+
+        // [1] 요청에 쿠키가 하나도 없는 경우
+        // - getCookies()가 null을 반환할 수 있으므로 NPE 방지
+        // - 쿠키가 없으면 Optional.empty() 반환
+        if (request.getCookies() == null) return Optional.empty();
+
+        // [2] 쿠키 배열에서 name과 동일한 쿠키를 찾고 값을 Optional 로 감싸서 반환
+        // - filter : 쿠키 이름이 요청한 name과 같은지 확인
+        // - map    : Cookie 객체에서 value만 추출
+        // - findFirst : 첫 번째 매칭되는 쿠키만 반환
+        return Arrays.stream(request.getCookies())
+                .filter(c -> name.equals(c.getName()))
+                .map(Cookie::getValue)
+                .findFirst();
+    } // func end
+
+} // class end

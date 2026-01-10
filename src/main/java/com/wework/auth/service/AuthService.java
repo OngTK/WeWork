@@ -2,6 +2,7 @@ package com.wework.auth.service;
 
 import com.wework.auth.dto.request.LoginRequestDto;
 import com.wework.auth.dto.response.LoginResponseDto;
+import com.wework.auth.dto.response.TokenReissueResponseDto;
 import com.wework.auth.infra.redis.RedisTokenStore;
 import com.wework.global.security.JwtTokenProvider;
 import com.wework.global.security.UserPrincipal;
@@ -32,14 +33,14 @@ public class AuthService {
     }
 
     /**
-     * [AUTH_010] 로그인
+     * [AUTH_012] 로그인
      *
-     * 처리 흐름
-     * 1) Spring Security 인증(AuthenticationManager.authenticate)
-     * 2) 인증 성공 시 principal(UserPrincipal) 획득
-     * 3) Access/Refresh 토큰 발급
-     * 4) Refresh 토큰은 Redis에 저장하여 "재발급 가능 여부"를 서버가 통제
-     * 5) 권한(ROLE_*) 목록 추출 후 응답 DTO 구성
+     * <P>처리 흐름</P>
+     * <P>1) Spring Security 인증(AuthenticationManager.authenticate)</P>
+     * <P>2) 인증 성공 시 principal(UserPrincipal) 획득</P>
+     * <P>3) Access/Refresh 토큰 발급</P>
+     * <P>4) Refresh 토큰은 Redis에 저장하여 "재발급 가능 여부"를 서버가 통제</P>
+     * <P>5) 권한(ROLE_*) 목록 추출 후 응답 DTO 구성</P>
      *
      * @param requestDto loginId/password 입력 DTO
      * @return 로그인 응답 본문 + refreshToken(cookie용) + refresh ttl
@@ -88,5 +89,55 @@ public class AuthService {
                 ).build();
         // [7] Controller가 쿠키 세팅을 할 수 있도록 refreshToken/TTL을 함께 반환
         return new LoginResult(responseDto, refresh.token(), refresh.ttlSeconds());
-    }// class end
-} // class
+    } // func end
+
+    /**
+     * 재생성한 AccessToken 반환용 record
+     */
+    public record ReissueResult(TokenReissueResponseDto body, String refreshToken, long refreshTtlSeconds){}
+
+    /**
+     * [AUTH_12] 토큰 재발급(Refresh Rotation 적용)
+     * @param refreshTokenCookie 쿠키에서 읽은 refreshToken(JWT 문자열)
+     * @return 새 accessToken 응답 + 새 refreshToken(쿠키 세팅용) + refresh TTL
+     * */
+    public ReissueResult reissueToken(String refreshTokenCookie){
+        // [1] refreshToken 유효성 검증 (서명/만료/구조)
+        if(!jwtTokenProvider.validate(refreshTokenCookie)){
+            // 유효성 검증 실패 시, Exception 발생
+            // IllegalArgumentException
+            // - 메서드에 전달된 인자가 유효하지 않음
+            throw new IllegalArgumentException("Invalid refresh token");
+        }
+        // [2] 토큰 타입 검증 (refresh만 허용)
+        String typ = jwtTokenProvider.getType(refreshTokenCookie);
+        if(!"refresh".equals(typ)){
+            throw new IllegalArgumentException("Token type is not refresh");
+        }
+        // [3] refresh 토큰에서 사용자 식별 및 jti 추출
+        long empId = jwtTokenProvider.getEmpId(refreshTokenCookie);
+        String loginId = jwtTokenProvider.getLoginId(refreshTokenCookie);
+        String refreshJti = jwtTokenProvider.getJti(refreshTokenCookie);
+        // [4] Redis에 refresh jti 존재 여부 확인
+        // - Redis에 없으면 이미 로그아웃/폐기된 refresh >> 재발급 불가
+        if(!redisTokenStore.existsRefresh(refreshJti)){
+            throw new IllegalArgumentException("Refresh token not found in store");
+        }
+        // [5] (Rotation) 기존 refresh 폐기
+        redisTokenStore.deleteRefresh(refreshJti);
+        // [6] 새 토큰 발급 (access + refresh)
+        JwtTokenProvider.TokenWithMeta newAccess = jwtTokenProvider.createAccessToken(empId, loginId);
+        JwtTokenProvider.TokenWithMeta newRefresh = jwtTokenProvider.createRefreshToken(empId, loginId);
+        // [7] 새 refresh를 Redis 저장
+        redisTokenStore.storeRefresh(newRefresh.jti(), empId, newRefresh.ttlSeconds());
+        // [8] 응답 Body 구성 (AccessToken만 JSON으로 반환)
+        TokenReissueResponseDto body = TokenReissueResponseDto.builder()
+                .accessToken(newAccess.token())
+                .expiresIn(newAccess.ttlSeconds())
+                .build();
+
+        return new ReissueResult(body, newAccess.token(), newAccess.ttlSeconds());
+    } // func end
+
+
+} // class end
