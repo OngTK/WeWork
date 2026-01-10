@@ -92,6 +92,29 @@ public class AuthService {
     } // func end
 
     /**
+     * [AUTH_011] 로그아웃
+     * - RefreshToken 쿠키 기반 로그아웃
+     * - Redis에서 refresh jti 삭제하여 재발급 차단
+     * */
+    public void logout(String refreshTokenCookie){
+        // [1] 쿠키가 없거나 비정상이면, 이미 로그아웃된 것으로 보고 종료
+        if(refreshTokenCookie == null || refreshTokenCookie.isBlank()){return;}
+
+        // [2] refresh 토큰 파싱/검증
+        // 만료/위조 Token이면 Redis 처리 없이 종료
+        if(!jwtTokenProvider.validate(refreshTokenCookie)){return;}
+
+        // [3] refresh 타입인지 확인
+        String typ = jwtTokenProvider.getType(refreshTokenCookie);
+        // refresh가 아니면 종료
+        if(!"refresh".equals(typ)){return;}
+
+        // [4] refresh jti 추출 후 redis에서 삭제
+        String refreshJti = jwtTokenProvider.getJti(refreshTokenCookie);
+        redisTokenStore.deleteRefresh(refreshJti);
+    }// func end
+
+    /**
      * 재생성한 AccessToken 반환용 record
      */
     public record ReissueResult(TokenReissueResponseDto body, String refreshToken, long refreshTtlSeconds){}

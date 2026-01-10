@@ -82,7 +82,15 @@ public class CookieUtil {
             String sameSite,
             String path
     ){
-        addHttpOnlyCookie(response, name, "", 0, secure, sameSite, path);
+        addHttpOnlyCookie(
+                response,
+                name,
+                "",
+                0,
+                secure,
+                sameSite,
+                path
+        );
     } // func end
 
     /**

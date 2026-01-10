@@ -8,10 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -60,6 +57,34 @@ public class AuthController {
         );
         // [3] AccessToken은 JSON Body로 반환 (프론트는 Authorization 헤더에 실어 사용)
         return ResponseEntity.ok(result.body());
+    } // func end
+
+    /**
+     * [AUTH_011] 로그아웃
+     * - RefreshToken 쿠키 삭제
+     * - Redis Refresh 세션 삭제
+     * */
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(
+            HttpServletResponse response,
+            HttpServletRequest request
+    ){
+        // [1] Cookie에서 refreshToken 조회
+        String refreshToken = CookieUtil.getCookieValue(request,"refreshToken")
+                .orElse(null);
+
+        // [2] Service 처리 (Redis refresh 삭제)
+        authService.logout(refreshToken);
+
+        // [3] Client 쿠키 삭제
+        CookieUtil.deleteCookie(
+                response,
+                "refreshToken",
+                false,
+                "Lax",
+                "/"
+        );
+        return ResponseEntity.ok().build();
     } // func end
 
     /**
