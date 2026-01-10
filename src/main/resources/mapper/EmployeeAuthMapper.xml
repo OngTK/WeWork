@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wework.employee.mapper.EmployeeAuthMapper">
+
+    <select id="selectRoleCodesByEmpId" resultType="string">
+        select
+            r.role_code
+        from employee_role er
+        join role r
+            on r.role_id = er.role_id
+        where er.emp_id = #{empId}
+        order by r.role_id
+    </select>
+
+</mapper>

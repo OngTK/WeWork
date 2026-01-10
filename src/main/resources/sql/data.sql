@@ -56,13 +56,15 @@ INSERT INTO permission (perm_code, perm_name, description) VALUES
 INSERT INTO employee
 (login_id, password, name, birthday, sex, email, status, dept_id, position)
 VALUES
-('admin',   '{bcrypt}$2a$10$sampleAdminHash',   '최고관리자', '1985-02-14', 'M', 'admin@wework.local',   'ACTIVE', 200001, '대표'),
-
-('mgr_hr',  '{bcrypt}$2a$10$sampleMgrHash01',   '김지은',     '1990-06-01', 'F', 'j.kim@wework.local',   'ACTIVE', 200002, '부장'),
+('admin',   '{bcrypt}$2a$10$zJNrwhIWXc73oejs78A4F.m./1MVNHOaKZruornL26JJrreCWfDoq',   '최고관리자', '1985-02-14', 'M', 'admin@wework.local',   'ACTIVE', 200001, '대표'),
+-- origin : {bcrypt}$2a$10$sampleAdminHash / password : 1234!
+('mgr_hr',  '{bcrypt}$2a$10$VbvNLQvaavuQ6PwpWDu.u.1VWkELNxSt9/NsYU.04w9TpmKzqyg7m',   '김지은',     '1990-06-01', 'F', 'j.kim@wework.local',   'ACTIVE', 200002, '부장'),
+-- origin : {bcrypt}$2a$10$sampleMgrHash01 / password : testmgr!
 ('mgr_dev', '{bcrypt}$2a$10$sampleMgrHash02',   '박민수',     '1988-11-21', 'M', 'm.park@wework.local',  'ACTIVE', 200004, '이사'),
 ('mgr_sales','{bcrypt}$2a$10$sampleMgrHash03',  '이서준',     '1987-03-09', 'M', 's.lee@wework.local',   'ACTIVE', 200005, '부장'),
 
-('wk_hr1',  '{bcrypt}$2a$10$sampleWkHash01',    '정유진',     '1996-08-12', 'F', 'y.jung@wework.local',  'ACTIVE', 200002, '사원'),
+('wk_hr1',  '{bcrypt}$2a$10$0tGDrrozZchl.gTI7PKjf.Uf.tHbOdnRIsJU9c/es3SVMNmdD9jQW',    '정유진',     '1996-08-12', 'F', 'y.jung@wework.local',  'ACTIVE', 200002, '사원'),
+-- origin : {bcrypt}$2a$10$sampleWkHash01 / password : wjddbwls01!
 ('wk_fin1', '{bcrypt}$2a$10$sampleWkHash02',    '한도윤',     '1994-12-30', 'M', 'd.han@wework.local',   'ACTIVE', 200003, '과장'),
 ('wk_dev1', '{bcrypt}$2a$10$sampleWkHash03',    '오태훈',     '1997-01-18', 'M', 't.oh@wework.local',    'ACTIVE', 200004, '사원'),
 ('wk_dev2', '{bcrypt}$2a$10$sampleWkHash04',    '서하린',     '1995-09-07', 'F', 'h.seo@wework.local',   'ACTIVE', 200004, '과장'),

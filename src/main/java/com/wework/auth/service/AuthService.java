@@ -82,7 +82,7 @@ public class AuthService {
                 .user(LoginResponseDto.UserSummary.builder()
                         .empId(userPrincipal.getEmpId())
                         .loginId(userPrincipal.getLoginId())
-                        .name("임시") // TODO: employee 테이블에서 name 조회로 교체
+                        .name(userPrincipal.getUsername())
                         .roles(roles)
                         .build()
                 ).build();

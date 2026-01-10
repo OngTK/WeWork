@@ -1,6 +1,10 @@
 package com.wework.global.security;
 
+import com.wework.employee.entity.EmployeeEntity;
+import com.wework.employee.mapper.EmployeeAuthMapper;
+import com.wework.employee.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -28,9 +32,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    // 실제 구현 시 주입될 컴포넌트들 예시
-    // private final EmployeeRepository employeeRepository;
-    // private final AuthorizationQueryService authorizationQueryService;
+     private final EmployeeRepository employeeRepository;
+     private final EmployeeAuthMapper employeeAuthMapper;
+//     private final AuthorizationQueryService authorizationQueryService;
 
     /**
      * loginId(사용자명)으로 사용자 정보를 로드.
@@ -42,52 +46,40 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String loginId) throws UsernameNotFoundException {
 
-        /*
-         * TODO: employee 테이블 조회 Repository/Mapper로 교체
-         *
-         * 실제 구현 예:
-         *
-         * Employee e = employeeRepository.findByLoginId(loginId)
-         *     .orElseThrow(() -> new UsernameNotFoundException("User not found : " + loginId));
-         *
-         * boolean enabled = "ACTIVE".equals(e.getStatus());
-         * List<String> roles = authorizationQueryService.getRoleCodes(e.getEmpId());
-         *
-         * List<SimpleGrantedAuthority> authorities = roles.stream()
-         *     .map(roleCode -> new SimpleGrantedAuthority("ROLE_" + roleCode))
-         *     .toList();
-         *
-         * return new UserPrincipal(
-         *     e.getEmpId(),
-         *     e.getLoginId(),
-         *     e.getPasswordHash(),
-         *     enabled,
-         *     authorities
-         * );
-         */
+        // [1] loginId 기준으로 사용자 조회
+        // - 존재하지 않으면 Spring Security 규약에 따라 UsernameNotFoundException 발생
+        // - AuthenticationManager → DaoAuthenticationProvider → UserDetailsService 순으로 호출됨
+        EmployeeEntity e = employeeRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found : " + loginId));
 
-        // ============================
-        // 임시 하드코딩(로그인 기능 뼈대 확인용)
-        // ============================
-        if (!"admin".equals(loginId)) {
-            // 사용자가 없으면 UsernameNotFoundException을 던져야
-            // Spring Security가 인증 실패로 처리한다.
-            throw new UsernameNotFoundException("User not found: " + loginId);
+        // [2] 비활성 상태 계정이면 로그인 차단
+        // - e.isActive()는 status 필드가 ACTIVE 인지 검사
+        // - DisabledException은 Spring Security가 처리하는 비활성 계정 예외
+        if (!e.isActive()) {
+            throw new DisabledException("Inactive user: " + loginId);
         }
 
-        long empId = 100001L;
-        String passwordHash = "{bcrypt}$2a$10$sampleAdminHash"; // 실제 DB에서 읽어온 비밀번호 해시로 교체
-        boolean enabled = true;
+        // [3] 계정의 역할(role) 목록을 조회
+        // - 예: SUPER_ADMIN, MANAGER, WORKER
+        // - 권한/인가 처리를 위해 ROLE_ 접두사를 붙여 GrantedAuthority 로 변환해야 함
+        List<String> roleCodes = employeeAuthMapper.selectRoleCodesByEmpId(e.getEmpId());
 
-        // SUPER_ADMIN, MANAGER, WORKER 권한을 모두 가진 사용자 예시
-        List<SimpleGrantedAuthority> authorities = List.of(
-                new SimpleGrantedAuthority("ROLE_SUPER_ADMIN"),
-                new SimpleGrantedAuthority("ROLE_MANAGER"),
-                new SimpleGrantedAuthority("ROLE_WORKER")
+        // [4] 스프링 시큐리티에서 사용하는 권한 객체(SimpleGrantedAuthority)로 변환
+        // - ROLE_SUPER_ADMIN / ROLE_MANAGER / ROLE_WORKER 형태
+        List<SimpleGrantedAuthority> authorities = roleCodes.stream()
+                .map(rc -> new SimpleGrantedAuthority("ROLE_" + rc))
+                .toList();
+
+        // [5] UserDetails 구현체(UserPrincipal)로 래핑하여 반환
+        // - AuthenticationManager가 비밀번호 비교(BCrypt) 및 권한 검증에 사용
+        // - enabled=true (비활성 여부는 이미 [2]에서 체크)
+        return new UserPrincipal(
+                e.getEmpId(),        // PK
+                e.getLoginId(),      // username
+                e.getPassword(),     // 인코딩된 bcrypt 비밀번호
+                true,                // enabled (별도 disabled 조건 없음)
+                authorities          // 권한 목록
         );
-
-        // UserPrincipal은 UserDetails 구현체로서 SecurityContext에 저장될 인증 주체.
-        return new UserPrincipal(empId, loginId, passwordHash, enabled, authorities);
-    }
+    } // func end
 
 } // class end
