@@ -78,7 +78,7 @@ public class SecurityConfig {
                  * ------------------------------------------------------- */
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()                 // 로그인/회원가입 API 허용
-                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                        .requestMatchers("/api/account/**").authenticated()          //
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()      // Preflight 허용
                         .anyRequest().authenticated()                                         // 나머지는 인증 필요
                 )
