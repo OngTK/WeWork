@@ -1,7 +1,10 @@
 package com.wework.auth.api;
 
+import com.wework.auth.dto.request.EmailCodeSendRequestDto;
+import com.wework.auth.dto.request.EmailCodeVerifyRequestDto;
 import com.wework.auth.dto.request.LoginRequestDto;
 import com.wework.auth.service.AuthService;
+import com.wework.auth.service.EmailAuthCodeService;
 import com.wework.global.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,6 +19,32 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final EmailAuthCodeService emailAuthCodeService;
+
+    // 회원가입 관련 =============================================================
+    /**
+     * [AUTH_002] 이메일 인증코드 발송
+     * */
+    @PostMapping("/email")
+    public ResponseEntity<?> sendEmailCode(@Valid @RequestBody EmailCodeSendRequestDto requestDto){
+        emailAuthCodeService.sendCode(requestDto.getEmail());
+        return ResponseEntity.ok().build();
+    } // func end
+
+    /**
+     * [AUTH_003] 이메일 인증코드 검증
+     * */
+    @PostMapping("/email/verify")
+    public ResponseEntity<?> verifyEmailCode(@Valid @RequestBody EmailCodeVerifyRequestDto requestDto){
+        boolean result = emailAuthCodeService.verifyCode(requestDto.getEmail(), requestDto.getCode());
+        // false 이면, 400
+        if(!result){
+            return ResponseEntity.status(400).body("Invalid Code");
+        }
+        return ResponseEntity.ok().build();
+    } // func end
+
+    // 로그인·토큰 관련 ===========================================================
 
     /**
      * [AUTH_010] 로그인

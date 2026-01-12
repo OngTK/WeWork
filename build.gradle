@@ -23,18 +23,16 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'      // ✅ Spring Boot Actuator : 로그·모니터링
     implementation 'org.springframework.boot:spring-boot-starter-validation'    // ✅ Validation : DTO 검증 / @NotNull, @NotBlack, @Size 등
     implementation 'org.springframework.boot:spring-boot-starter-security'      // ✅ Spring Security
-
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     // ✅ Thymeleaf
     // React 전후로 API 서버 전용 or 관리자 페이지 등으로만 사용
-
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'      // ✅ Spring Data JPA
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.5'  // ✅ MyBatis Framework
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'    // ✅ Redis
     implementation "org.springframework.session:spring-session-data-redis"      // ✅ Redis session
-
     // thymeleaf security extras는 필요할 때만 + 버전은 보통 생략 권장
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'          // ✅ mail 전송
 
     // ✅ Lombok
     compileOnly 'org.projectlombok:lombok'

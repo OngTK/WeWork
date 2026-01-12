@@ -1,0 +1,5 @@
+# day04_251110 AppStart build failure
+
+`TodoRepository` imports `example2.day04_251110.entity.TodoEntity`, but the compiler reports that the package does not exist when `AppStart` is built. The repository import is correct – the entity class lives in `src/main/java/example2/day04_251110/entity/TodoEntity.java` – however that entity depends on Lombok annotations (`@Data`, `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor`) and Jakarta Persistence/JPA annotations (`@Entity`, `@Table`, `@Id`, `@GeneratedValue`, `@Column`). If those dependencies are not available (for example, when the Gradle project has not been refreshed or annotation processing is disabled), the entity fails to compile. Once compilation of `TodoEntity` fails, the compiler treats the package as missing, which is why the import in the repository blows up.
+
+Make sure the Gradle project is opened so that the dependencies declared in `build.gradle` (notably `spring-boot-starter-data-jpa` and Lombok) are resolved and annotation processing is enabled in the IDE. After the project syncs and the entity compiles successfully, the error disappears.
