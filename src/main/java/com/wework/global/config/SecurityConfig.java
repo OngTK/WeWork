@@ -1,5 +1,9 @@
-package com.wework.global.security;
+package com.wework.global.config;
 
+import com.wework.global.security.AccessDeniedHandlerImpl;
+import com.wework.global.security.AuthenticationEntryPointImpl;
+import com.wework.global.security.JwtAuthenticationFilter;
+import com.wework.global.security.JwtProperties;
 import jakarta.servlet.Filter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -77,10 +81,11 @@ public class SecurityConfig {
                  * 3) 경로별 접근 정책
                  * ------------------------------------------------------- */
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()                 // 로그인/회원가입 API 허용
-                        .requestMatchers("/api/account/**").authenticated()          //
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()      // Preflight 허용
-                        .anyRequest().authenticated()                                         // 나머지는 인증 필요
+                        .requestMatchers("/api/auth/**").permitAll()                // 로그인/회원가입 API 허용
+                        .requestMatchers("/api/admin/**").hasRole("SUPER_ADMIN")    // SUPER_ADMIN 에 대해서만 관련 기능 활성화
+                        .requestMatchers("/api/account/**").authenticated()         // 계정관련 기능
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()     // Preflight 허용
+                        .anyRequest().authenticated()                                        // 나머지는 인증 필요
                 )
 
                 /* -------------------------------------------------------

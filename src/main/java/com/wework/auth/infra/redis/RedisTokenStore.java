@@ -5,6 +5,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Refresh Token 및 Access Token Blacklist를 Redis에 저장·조회·삭제하는 저장소 클래스.
@@ -43,6 +44,10 @@ public class RedisTokenStore {
     // RedisTemplate을 통한 Redis 접근
     private final RedisTemplate<String, Object> redisTemplate;
 
+    // [AUTH_013] 추가
+    private static final String KEY_REFRESH_JTI = "refresh:";       // refresh: {jti}
+    private static final String KEY_EMP_REFRESH = "emp_refresh:";   // emp_refresh: {empId}
+
     /* =========================================================
      *  Redis Key 생성 메서드
      * ========================================================= */
@@ -62,19 +67,31 @@ public class RedisTokenStore {
      * ========================================================= */
 
     /**
-     * Refresh Token 저장.
+     * Refresh Token 정보를 Redis에 저장합니다.
      *
-     * @param refreshJti Refresh Token의 JTI
-     * @param empId      사용자 사번(PK)
-     * @param ttlSeconds TTL(토큰 유효 시간, 초 단위)
+     * @param refreshJti  Refresh Token의 고유 식별자(JTI)
+     * @param empId       사용자 사번(PK)
+     * @param ttlSeconds  토큰의 TTL(Time To Live, 초 단위)
      *
      * <p>
-     * Redis에 <code>auth:refresh:{jti}</code> → empId 형태로 저장되며,
-     * TTL 종료 시 자동 삭제된다.
+     * 아래 두 가지 Key를 Redis에 저장합니다:
+     * <ul>
+     *   <li><code>auth:refresh:{jti}</code> → empId
+     *       <br/>· 특정 Refresh Token(JTI)이 어떤 사용자에게 속하는지 조회할 때 사용합니다.</li>
+     *
+     *   <li><code>auth:emp_refresh:{empId}</code> → jti
+     *       <br/>· 특정 사용자의 최신 Refresh Token(JTI)을 찾을 때 사용합니다.</li>
+     * </ul>
+     *
+     * 두 Key 모두 TTL이 만료되면 자동 삭제됩니다.
      * </p>
      */
     public void storeRefresh(String refreshJti, long empId, long ttlSeconds) {
-        redisTemplate.opsForValue().set(refreshKey(refreshJti), empId, Duration.ofSeconds(ttlSeconds));
+        // refresh:{jti} -> empId
+        redisTemplate.opsForValue().set(KEY_REFRESH_JTI + refreshJti, String.valueOf(empId), ttlSeconds, TimeUnit.SECONDS);
+
+        // emp_refresh:{empId} -> jti
+        redisTemplate.opsForValue().set(KEY_EMP_REFRESH + empId, refreshJti, ttlSeconds, TimeUnit.SECONDS);
     } // func end
 
     /**
@@ -82,14 +99,78 @@ public class RedisTokenStore {
      * DB 조회 없이 Redis를 통해 빠르게 확인 가능.
      */
     public boolean existsRefresh(String refreshJti) {
-        return Boolean.TRUE.equals(redisTemplate.hasKey(refreshKey(refreshJti)));
+        return Boolean.TRUE.equals(redisTemplate.hasKey(KEY_REFRESH_JTI + refreshJti));
     } // func end
 
     /**
-     * Refresh Token 삭제 (로그아웃/재발급 시 호출).
+     * Refresh Token 삭제 처리 메서드
+     *
+     * <p>
+     * 주로 로그아웃 또는 Refresh Token 재발급 시 호출되며,
+     * 다음 두 가지 Redis 데이터를 함께 제거합니다:
+     * </p>
+     *
+     * <ul>
+     *   <li><code>auth:refresh:{jti}</code> → empId
+     *       <br/>· Refresh Token(JTI)과 사용자 사번 매핑 데이터</li>
+     *
+     *   <li><code>auth:emp_refresh:{empId}</code> → jti
+     *       <br/>· 해당 사용자의 현재 Refresh Token(JTI)을 저장한 데이터</li>
+     * </ul>
+     *
+     * <p>
+     * 전달받은 JTI 기반으로 먼저 empId 를 조회한 뒤,
+     * 관련된 모든 Refresh Token 정보를 안전하게 삭제합니다.
+     * </p>
+     *
+     * @param refreshJti 삭제할 Refresh Token의 고유 식별자(JTI)
      */
     public void deleteRefresh(String refreshJti) {
-        redisTemplate.delete(refreshKey(refreshJti));
+        String empId = (String) redisTemplate.opsForValue().get(KEY_REFRESH_JTI+ refreshJti);
+        redisTemplate.delete(KEY_REFRESH_JTI + refreshJti);
+        if(empId != null){
+            redisTemplate.delete(KEY_EMP_REFRESH + empId);
+        }
+    } // func end
+
+    /**
+     * [AUTH_013] 강제 로그아웃 처리.
+     *
+     * <p>
+     * 특정 사용자(empId)에 대한 Refresh Token 정보를 모두 제거합니다.
+     * 다음 두 가지 Redis Key를 정리하는 방식으로 강제 로그아웃을 수행합니다:
+     * </p>
+     *
+     * <ul>
+     *   <li><code>auth:emp_refresh:{empId}</code> → jti
+     *       <br/>· 해당 사용자의 현재 Refresh Token(JTI)을 저장한 Key</li>
+     *
+     *   <li><code>auth:refresh:{jti}</code> → empId
+     *       <br/>· JTI 기반으로 사용자 사번을 조회하는 Key</li>
+     * </ul>
+     *
+     * <p>
+     * 강제 로그아웃 시나리오:
+     * <br/>1) empId로 현재 JTI 조회
+     * <br/>2) empId 기반 Key 삭제
+     * <br/>3) 조회된 JTI 기반 Refresh Token Key도 함께 삭제
+     * </p>
+     *
+     * @param empId 강제 로그아웃시킬 사용자 사번(PK)
+     */
+    public void deleteRefreshByEmpId(long empId) {
+
+        // [1] 사용자에게 매핑된 Refresh Token JTI 조회
+        String jti = (String) redisTemplate.opsForValue()
+                .get(KEY_EMP_REFRESH + empId);
+
+        // [2] auth:emp_refresh:{empId} 삭제 (사용자의 현재 Refresh Token 정보 제거)
+        redisTemplate.delete(KEY_EMP_REFRESH + empId);
+
+        // [3] auth:refresh:{jti} 삭제 (JTI 기준 Refresh Token 자체 제거)
+        if (jti != null) {
+            redisTemplate.delete(KEY_REFRESH_JTI + jti); // ★ 버그 수정됨
+        }
     } // func end
 
     /* =========================================================
@@ -119,4 +200,5 @@ public class RedisTokenStore {
     public boolean isBlacklisted(String accessJti) {
         return Boolean.TRUE.equals(redisTemplate.hasKey(blacklistKey(accessJti)));
     }
+
 } // class end
