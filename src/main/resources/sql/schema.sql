@@ -50,12 +50,12 @@ CREATE TABLE role (
 -- =========================================================
 CREATE TABLE employee (
   emp_id     BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  login_id   VARCHAR(50)  NOT NULL,
+  login_id   VARCHAR(50)  NOT NULL UNIQUE,
   password   VARCHAR(255) NOT NULL,
   name       VARCHAR(50)  NOT NULL,
   birthday   DATE NULL,
   sex        CHAR(1) NULL,
-  email      VARCHAR(255) NULL,
+  email      VARCHAR(255) NULL UNIQUE,
   status     VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
   dept_id    INT UNSIGNED NULL,
   position   VARCHAR(10) NOT NULL,

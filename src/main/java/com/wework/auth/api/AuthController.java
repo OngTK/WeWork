@@ -3,8 +3,11 @@ package com.wework.auth.api;
 import com.wework.auth.dto.request.EmailCodeSendRequestDto;
 import com.wework.auth.dto.request.EmailCodeVerifyRequestDto;
 import com.wework.auth.dto.request.LoginRequestDto;
+import com.wework.auth.dto.request.SignUpRequestDto;
+import com.wework.auth.dto.response.SignUpResponseDto;
 import com.wework.auth.service.AuthService;
 import com.wework.auth.service.EmailAuthCodeService;
+import com.wework.auth.service.SignUpService;
 import com.wework.global.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,8 +23,18 @@ public class AuthController {
 
     private final AuthService authService;
     private final EmailAuthCodeService emailAuthCodeService;
+    private final SignUpService signUpService;
 
     // 회원가입 관련 =============================================================
+    /**
+     * [AUTH_001] 회원가입
+     * */
+    @PostMapping("/signup")
+    public ResponseEntity<?> singUp(@Valid @RequestBody SignUpRequestDto dto){
+        SignUpResponseDto response = signUpService.signUp(dto);
+        return ResponseEntity.ok(response);
+    } // func end
+
     /**
      * [AUTH_002] 이메일 인증코드 발송
      * */

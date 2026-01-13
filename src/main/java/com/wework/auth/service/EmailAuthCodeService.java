@@ -2,6 +2,7 @@ package com.wework.auth.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -20,7 +21,10 @@ public class EmailAuthCodeService {
     private final JavaMailSender mailSender;
 
     private static final String KEY_EMAIL_VERIFY = "email_verify:"; // 검증 이메일
-    private static final long CODE_TTL_SECONDS = 300;               // 검증 코드
+    private static final long CODE_TTL_SECONDS = 300;               // 검증 TTL (5min = 300sec)
+
+    private static final String KEY_EMAIL_VERIFIED = "email_verified:";  // 검증 완료 이메일
+    private static final long VERIFIED_TTL_SECONDS = 1800 ;              // 검증 TTL (30min = 1800sec)
 
     /**
      * 6자리 난수 만들기 함수
@@ -72,9 +76,12 @@ public class EmailAuthCodeService {
         if(savedCode == null) return false;
         // [3] Redis 코드와 사용자 입력 코드의 일치 확인
         boolean ok = String.valueOf(savedCode).equals(code);
-        // [4] 일치할 경우, Redis에서 관련 정보 삭제
+        // [4] 일치할 경우
         if(ok){
+            // [4-1] Redis에서 관련 정보 삭제
             redisTemplate.delete(KEY_EMAIL_VERIFY+email);
+            // [4-2] 검증완료 플래그 저장
+            redisTemplate.opsForValue().set(KEY_EMAIL_VERIFIED+ email,"true",CODE_TTL_SECONDS,TimeUnit.SECONDS);
         }
         return ok;
     } // func end
