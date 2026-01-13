@@ -1,9 +1,7 @@
 package com.wework.account.api;
 
-import com.wework.account.dto.response.MyAuthResponseDto;
 import com.wework.account.service.AccountService;
 import com.wework.global.security.UserPrincipal;
-import com.wework.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
