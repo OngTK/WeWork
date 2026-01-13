@@ -43,12 +43,50 @@
                   "path": "/api/account/me"
                 },
                 "id": "c04142b2-8638-4d4a-ba9a-818fb00ef9bd",
-                "name": "[Account_001] 내 정보 조회",
+                "name": "[ACCOUNT_001] 내 정보 조회",
                 "headers": [
                   {
                     "enabled": true,
                     "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzM4NCJ9.eyJqdGkiOiIxZTM5YWVjMi04ODEzLTRkNmUtYWQ0MS03ODgxODMxNDlmNGIiLCJzdWIiOiIxMDAwMTEiLCJ0eXAiOiJhY2Nlc3MiLCJsb2dpbklkIjoibmV3X3VzZXIwMSIsImlhdCI6MTc2ODMwNjA4MSwiZXhwIjoxNzY4MzA5NjgxfQ.vWhaz1lJW__SftlvO9rwFre5h4wbJ2fG-SnZT7JB8HBe1VQk83Cfc15EwNVDsX6H"
+                    "value": "Bearer eyJhbGciOiJIUzM4NCJ9.eyJqdGkiOiIzZTIzYjI3ZS1iNTczLTRlZDItODU1NS1iOGUxY2E3NTY0OWMiLCJzdWIiOiIxMDAwMDIiLCJ0eXAiOiJhY2Nlc3MiLCJsb2dpbklkIjoibWdyX2hyIiwiaWF0IjoxNzY4MzEyMjE2LCJleHAiOjE3NjgzMTU4MTZ9.u9itzuTYIfb_Aj7buyQWTULD8gjUDs1YEI1NCJkur-iTR876gEK3Nu2hAZR1lAb0"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+                  "name": "GET"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "localhost:8080",
+                  "path": "/api/account/me/auth"
+                },
+                "id": "9877bde6-e6cf-4ff3-9f90-6ad6b45f622b",
+                "name": "[ACCOUNT_004] 내 권한/역할/스코프 조회",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzM4NCJ9.eyJqdGkiOiIzZTIzYjI3ZS1iNTczLTRlZDItODU1NS1iOGUxY2E3NTY0OWMiLCJzdWIiOiIxMDAwMDIiLCJ0eXAiOiJhY2Nlc3MiLCJsb2dpbklkIjoibWdyX2hyIiwiaWF0IjoxNzY4MzEyMjE2LCJleHAiOjE3NjgzMTU4MTZ9.u9itzuTYIfb_Aj7buyQWTULD8gjUDs1YEI1NCJkur-iTR876gEK3Nu2hAZR1lAb0"
                   }
                 ]
               }
@@ -198,7 +236,7 @@
                     "items": []
                   },
                   "bodyType": "Text",
-                  "textBody": "{\n    \"loginId\": \"new_user01\",\n  \"password\": \"Test1234!\"\n}"
+                  "textBody": "{\n    \"loginId\": \"mgr_hr\",\n  \"password\": \"testmgr!\"\n}"
                 },
                 "uri": {
                   "query": {

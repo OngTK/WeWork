@@ -1,6 +1,8 @@
 package com.wework.account.service;
 
 import com.wework.account.dto.response.MyAccountResponseDto;
+import com.wework.account.dto.response.MyAuthResponseDto;
+import com.wework.account.mapper.AccountAuthMapper;
 import com.wework.employee.entity.EmployeeEntity;
 import com.wework.employee.repository.EmployeeRepository;
 import com.wework.global.security.UserPrincipal;
@@ -14,6 +16,7 @@ import java.util.List;
 public class AccountService {
 
     private final EmployeeRepository employeeRepository;
+    private final AccountAuthMapper accountAuthMapper;
 
     /**
      * [Account_001] 내 정보 조회
@@ -39,5 +42,15 @@ public class AccountService {
                 .build();
     } // [Account_001] func end
 
+    /**
+     * [ACCOUNT_004] 내 권한/역할/스코프 조회
+     * */
+    public MyAuthResponseDto getMyAuth(long empId){
+        List<String> roles = accountAuthMapper.selectRoleCodes(empId);
+        List<String> permissions = accountAuthMapper.selectPermissionCodes(empId);
+        List<Long> scopeDeptIds = accountAuthMapper.selectScopeDeptIds(empId);
+
+        return new MyAuthResponseDto(roles,permissions,scopeDeptIds);
+    } // func end
 
 } // class end

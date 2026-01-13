@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wework.account.mapper.AccountAuthMapper">
+
+    <!-- [ACCOUNT_004] 내 권한/역할/스코프 조회 -->
+    <!-- roles: employee_role -> role -->
+    <select id="selectRoleCodes" resultType="string">
+        SELECT r.role_code
+        FROM employee_role er
+        JOIN role r ON r.role_id = er.role_id
+        WHERE er.emp_id = #{empId}
+    </select>
+
+    <!-- permissions: employee_role -> role_permission -> permission -->
+    <select id="selectPermissionCodes" resultType="string">
+        SELECT DISTINCT p.perm_code
+        FROM employee_role er
+        JOIN role_permission rp ON rp.role_id = er.role_id
+        JOIN permission p ON p.perm_id = rp.perm_id
+        WHERE er.emp_id = #{empId}
+    </select>
+
+    <!-- scope: manager_scope -->
+    <select id="selectScopeDeptIds" resultType="long">
+        SELECT ms.dept_id
+        FROM manager_scope ms
+        WHERE ms.manager_emp_id = #{empId}
+    </select>
+
+</mapper>
