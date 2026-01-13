@@ -32,7 +32,7 @@ public class EmailAuthCodeService {
     } // func end
 
     /**
-     * 매일 발송(Gmail SMTP)
+     * 메일 발송(Gmail SMTP)
      * */
     private void setMail(String email, String code){
         try{
