@@ -16,4 +16,6 @@ public interface EmployeeRepository extends JpaRepository<EmployeeEntity, Long> 
     // [3] Email 존재 여부
     boolean existsByEmail (String email);
 
+
+
 } // interface end

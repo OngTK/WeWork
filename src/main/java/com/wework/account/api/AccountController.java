@@ -1,13 +1,15 @@
 package com.wework.account.api;
 
+import com.wework.account.dto.request.ChangePwRequestDto;
 import com.wework.account.service.AccountService;
+import com.wework.global.dto.response.CommonSuccessResponseDto;
 import com.wework.global.security.UserPrincipal;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/account")
@@ -24,6 +26,19 @@ public class AccountController {
     @GetMapping("/me")
     public ResponseEntity<?> getMyProfile(@AuthenticationPrincipal UserPrincipal principal){
         return ResponseEntity.ok(accountService.getMyProfile(principal));
+    } // func end
+
+    /**
+     * [ACCOUNT_003] 비밀번호 변경
+     * */
+    @PutMapping("/me/password")
+    public ResponseEntity<?> changePassword(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @Valid @RequestBody ChangePwRequestDto requestDto
+            ){
+        long empId = principal.getEmpId();
+        accountService.changeMyPassword(empId,requestDto);
+        return ResponseEntity.ok(CommonSuccessResponseDto.ok());
     } // func end
 
     /**
