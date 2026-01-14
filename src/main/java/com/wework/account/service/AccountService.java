@@ -1,6 +1,7 @@
 package com.wework.account.service;
 
 import com.wework.account.dto.request.ChangePwRequestDto;
+import com.wework.account.dto.request.UpdateMyAccountRequestDto;
 import com.wework.account.dto.response.MyAccountResponseDto;
 import com.wework.account.dto.response.MyAuthResponseDto;
 import com.wework.account.mapper.AccountAuthMapper;
@@ -46,7 +47,27 @@ public class AccountService {
                 .roles(roles)
                 .build();
     } // [Account_001] func end
-    
+
+    /**
+     * [ACCOUNT_002] 내 정보 수정
+     * - 이름, 이메일, 생일, 성별 수정 가능
+     * */
+    @Transactional
+    public void updateMyProfile(long empId, UpdateMyAccountRequestDto requestDto){
+        // [1] 계정 entity 추출
+        EmployeeEntity employeeEntity = employeeRepository.findById(empId)
+                .orElseThrow(() -> new IllegalStateException("유효하지 않은 사용자입니다."));
+        // [2] 이메일 중복 확인
+        if(employeeRepository.existsByEmail(requestDto.email())){
+            throw new IllegalStateException("이미 사용 중인 이메일입니다.");
+        }
+        // [3] 정보 업데이트
+        employeeEntity.setName(requestDto.name());
+        employeeEntity.setEmail(requestDto.email());
+        employeeEntity.setBirthday(requestDto.birthday());
+        employeeEntity.setSex(requestDto.sex());
+    } // func end
+
     /**
      * [ACCOUNT_003] 비밀번호 변경
      * */
@@ -68,7 +89,6 @@ public class AccountService {
         String newHashPw = passwordEncoder.encode(request.newPw());
         employeeEntity.setPassword(newHashPw);
     } // func end
-
 
     /**
      * [ACCOUNT_004] 내 권한/역할/스코프 조회

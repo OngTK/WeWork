@@ -1,6 +1,7 @@
 package com.wework.account.api;
 
 import com.wework.account.dto.request.ChangePwRequestDto;
+import com.wework.account.dto.request.UpdateMyAccountRequestDto;
 import com.wework.account.service.AccountService;
 import com.wework.global.dto.response.CommonSuccessResponseDto;
 import com.wework.global.security.UserPrincipal;
@@ -26,6 +27,18 @@ public class AccountController {
     @GetMapping("/me")
     public ResponseEntity<?> getMyProfile(@AuthenticationPrincipal UserPrincipal principal){
         return ResponseEntity.ok(accountService.getMyProfile(principal));
+    } // func end
+
+    /**
+     * [ACCOUNT_002] 내 정보 수정
+     * - 이름, 이메일, 생일, 성별 수정 가능
+     * */
+    @PutMapping("/me")
+    public ResponseEntity<?> updateMyProfile(@AuthenticationPrincipal UserPrincipal principal,
+                                             @Valid @RequestBody UpdateMyAccountRequestDto requestDto){
+        long empId = principal.getEmpId();
+        accountService.updateMyProfile(empId,requestDto);
+        return ResponseEntity.ok(CommonSuccessResponseDto.ok());
     } // func end
 
     /**
