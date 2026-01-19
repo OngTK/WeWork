@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -96,7 +97,7 @@ public class AuthService {
      * - RefreshToken 쿠키 기반 로그아웃
      * - Redis에서 refresh jti 삭제하여 재발급 차단
      * */
-    public void logout(String refreshTokenCookie){
+    public void logout(String refreshTokenCookie, String accessTokenHeader){
         // [1] 쿠키가 없거나 비정상이면, 이미 로그아웃된 것으로 보고 종료
         if(refreshTokenCookie == null || refreshTokenCookie.isBlank()){return;}
 
@@ -112,7 +113,30 @@ public class AuthService {
         // [4] refresh jti 추출 후 redis에서 삭제
         String refreshJti = jwtTokenProvider.getJti(refreshTokenCookie);
         redisTokenStore.deleteRefresh(refreshJti);
-    }// func end
+
+        // 2026.01.19 accessToken 삭제 및 블랙리스트 처리코드 추가 ---------------
+        // [5] accessToken이 없으면 스킵
+        if(accessTokenHeader == null || accessTokenHeader.isBlank()) return;
+        // [6] 만료/위조 토큰이면 스킵(이미 무효에 가까움)
+        if(!jwtTokenProvider.validate(accessTokenHeader)) return;
+        // [7] access typ인지 확인 후, jti를 TTL(남은 시간)과 함께 Redis blacklist에 저장
+        String typ2 = jwtTokenProvider.getType(accessTokenHeader);
+        if(!"access".equals(typ2)) return;
+        String accessJti = jwtTokenProvider.getJti(accessTokenHeader);
+        long ttlSeconds = getRemainingTtlSeconds(accessTokenHeader);
+        if(ttlSeconds <= 0) return;
+        redisTokenStore.blacklistAccess(accessJti,ttlSeconds);
+    } // func end
+
+    /**
+     * ttl 추출 메소드
+     * */
+    private long getRemainingTtlSeconds(String token){
+        Date exp = jwtTokenProvider.parse(token).getPayload().getExpiration();
+        long diffMs = exp.getTime() - System.currentTimeMillis();
+        return diffMs <= 0 ? 0 : diffMs/1000 ;
+    } // func end
+
 
     /**
      * 재생성한 AccessToken 반환용 record

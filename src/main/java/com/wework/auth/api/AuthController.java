@@ -114,9 +114,11 @@ public class AuthController {
         // [1] Cookie에서 refreshToken 조회
         String refreshToken = CookieUtil.getCookieValue(request,"refreshToken")
                 .orElse(null);
+        // [2] Authorization Header 에서 accessToken 조회
+        String accessToken = extractBearerToken(request);
 
         // [2] Service 처리 (Redis refresh 삭제)
-        authService.logout(refreshToken);
+        authService.logout(refreshToken, accessToken);
 
         // [3] Client 쿠키 삭제
         CookieUtil.deleteCookie(
@@ -128,6 +130,16 @@ public class AuthController {
         );
         return ResponseEntity.ok().build();
     } // func end
+
+    /**
+     * request 에서 Authrization >> AccessToken 출력용 내부 메소드
+     * */
+    private String extractBearerToken(HttpServletRequest request) {
+        String auth = request.getHeader("Authorization");
+        if (auth == null || auth.isBlank()) return null;
+        if (!auth.startsWith("Bearer ")) return null;
+        return auth.substring(7);
+    }
 
     /**
      * [AUTH_012] 토큰 재발급 (Reissue Token API)
