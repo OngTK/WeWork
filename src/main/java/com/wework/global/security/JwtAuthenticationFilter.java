@@ -1,5 +1,6 @@
 package com.wework.global.security;
 
+import com.wework.auth.infra.redis.RedisTokenStore;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,16 +24,7 @@ import java.io.IOException;
  * HTTP 헤더의 {@code Authorization: Bearer {token}} 값을 읽어
  * 유효한 JWT인 경우 SecurityContext에 인증 정보를 저장한다.
  * </p>
- *
- * 필터 동작 순서:
- * <ol>
- *   <li>Authorization 헤더 추출</li>
- *   <li>"Bearer " 토큰 형식인지 확인</li>
- *   <li>토큰 유효성 검사(JwtTokenProvider.validate)</li>
- *   <li>토큰에서 loginId 추출 후 UserDetails 조회</li>
- *   <li>UsernamePasswordAuthenticationToken 생성 및 SecurityContext 설정</li>
- *   <li>다음 필터로 체인 전달</li>
- * </ol>
+ * <p>2026.01.09 블랙리스트 관련 코드 추가</p>
  */
 @Component
 @RequiredArgsConstructor
@@ -45,6 +37,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     /** loginId 기반으로 사용자 정보를 로드하는 UserDetailsService 구현체 */
     private final CustomUserDetailsService userDetailsService;
 
+    private final RedisTokenStore redisTokenStore;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -52,22 +46,41 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         log.debug("[JWT] uri={}", request.getRequestURI());
         log.debug("[JWT] Authorization={}", request.getHeader("Authorization"));
 
-        // 1) Authorization 헤더 추출
+        // [1] Authorization 헤더 추출
         String auth = request.getHeader("Authorization");
 
-        // 2) "Bearer " 형식의 토큰인지 확인
+        // [2] "Bearer " 형식의 토큰인지 확인
         if (auth != null && auth.startsWith("Bearer ")) {
             String token = auth.substring(7);   // "Bearer " 이후의 실제 토큰 값
 
-            // 3) 토큰 유효성 검증
+            // [3] 토큰 유효성 검증
             if (jwtTokenProvider.validate(token)) {
-                // 4) 토큰에서 loginId 추출
+
+                // [4] access 토큰 여부 확인
+                String type = jwtTokenProvider.getType(token);
+                if (!"access".equals(type)) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
+                // [5] 블랙리스트 여부 체크
+                String jti = jwtTokenProvider.getJti(token);
+                if (redisTokenStore.isBlacklisted(jti)) {
+                    log.info("[JWT] blacklisted access token. jti={}", jti);
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter()
+                            .write("{\"message\":\"로그아웃된 토큰입니다.\"}");
+                    return; // 🔴 반드시 return
+                }
+
+                // [6] 토큰에서 loginId 추출
                 String loginId = jwtTokenProvider.getLoginId(token);
 
-                // 5) loginId 로 사용자 정보 조회 (권한, 계정 상태 등 포함)
+                // [7] loginId 로 사용자 정보 조회 (권한, 계정 상태 등 포함)
                 UserDetails userDetails = userDetailsService.loadUserByUsername(loginId);
 
-                // 6) 인증 객체 생성 (비밀번호는 null, 권한은 userDetails에서 가져옴)
+                // [8] 인증 객체 생성 (비밀번호는 null, 권한은 userDetails에서 가져옴)
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,
@@ -75,17 +88,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 userDetails.getAuthorities()
                         );
 
-                // 7) 요청 정보(IP, 세션 등)을 Authentication details에 셋팅
+                // [9] 요청 정보(IP, 세션 등)을 Authentication details에 셋팅
                 authentication.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request)
                 );
 
-                // 8) SecurityContext에 인증 정보 저장
+                // [10] SecurityContext에 인증 정보 저장
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } // if end
         } // if end
 
-        // 9) 다음 필터로 요청 전달
+        // [11] 다음 필터로 요청 전달
         filterChain.doFilter(request, response);
     } // func end
 } // class end
