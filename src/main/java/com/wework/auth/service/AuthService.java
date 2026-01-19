@@ -7,7 +7,9 @@ import com.wework.auth.infra.redis.RedisTokenStore;
 import com.wework.global.security.JwtTokenProvider;
 import com.wework.global.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,6 +20,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
@@ -48,18 +51,33 @@ public class AuthService {
      */
     public LoginResult login(LoginRequestDto requestDto) {
 
-        // [1] 인증 수행 (ID/PW 검증)
-        // - 실패 시 BadCredentialsException 등 예외 발생 → ControllerAdvice에서 401로 매핑 가능
-        // - 성공 시 Authentication 객체에 principal/authorities가 채워짐
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        requestDto.getLoginId(),
-                        requestDto.getPassword()
-                )
-        );
+        Authentication authentication;
+
+        try{
+            // [1] 인증 수행 (ID/PW 검증)
+            // - 실패 시 BadCredentialsException 등 예외 발생 → ControllerAdvice에서 401로 매핑 가능
+            // - 성공 시 Authentication 객체에 principal/authorities가 채워짐
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            requestDto.getLoginId(),
+                            requestDto.getPassword()
+                    )
+            );
+        } catch (BadCredentialsException e) {
+            // 실패 시 로그인 실패 횟수 누적
+            long failCount = redisTokenStore.increaseLoginFail(requestDto.getLoginId(), 30 * 60);
+            // 기존 예외를 그대로 던지면 ControllerAdvice에서 401로 매핑 가능
+            throw e;
+        }
+
+
         // [2] 인증 주체(principal) 추출
         // - CustomUserDetailsService가 만들어준 UserPrincipal(UserDetails 구현체)
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+
+        // [추가] 로그인 성공 시 로그인 시도 횟수 초기화
+        redisTokenStore.clearLoginFail(userPrincipal.getLoginId());
+
         // [3] Access / Refresh 토큰 발급
         // - Access: API 호출용(Bearer) / 짧은 만료
         // - Refresh: 재발급용(HttpOnly Cookie) / 긴 만료 + 서버(Redis) 저장

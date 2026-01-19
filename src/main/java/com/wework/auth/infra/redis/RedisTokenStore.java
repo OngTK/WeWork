@@ -235,4 +235,40 @@ public class RedisTokenStore {
         return Boolean.TRUE.equals(redisTemplate.hasKey(blacklistKey(accessJti)));
     }
 
+    // [AUTH_033] 로그인 실패 카운터 ==========
+    private String loginFailKey(String loginId) {
+        return "auth:login_fail:" + loginId;
+    }
+
+    /**
+     * [AUTH_033] 로그인 실패 횟수 증가
+     * - TTL을 같이 걸어 "일정 시간 후 자동 초기화"
+     * - 예: 30분 동안 누적, 30분 지나면 자동 리셋
+     *
+     * @return 증가 후 실패 횟수
+     */
+    public long increaseLoginFail(String loginId, long ttlSeconds) {
+        String key = loginFailKey(loginId);
+
+        Long count = redisTemplate.opsForValue().increment(key);
+        if (count != null && count == 1) {
+            // 첫 실패일 때만 TTL 세팅
+            redisTemplate.expire(key, ttlSeconds, TimeUnit.SECONDS);
+        }
+        return count == null ? 0 : count;
+    }
+
+    /** 로그인 성공 시 실패 횟수 초기화(권장: AUTH_010 내부) */
+    public void clearLoginFail(String loginId) {
+        redisTemplate.delete(loginFailKey(loginId));
+    }
+
+    /** (선택) 현재 실패 횟수 조회 */
+    public long getLoginFailCount(String loginId) {
+        Object v = redisTemplate.opsForValue().get(loginFailKey(loginId));
+        if (v == null) return 0;
+        try { return Long.parseLong(String.valueOf(v)); }
+        catch (Exception e) { return 0; }
+    }
+
 } // class end
