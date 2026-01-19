@@ -67,6 +67,9 @@ public class AuthService {
                 jwtTokenProvider.createAccessToken(userPrincipal.getEmpId(), userPrincipal.getLoginId());
         JwtTokenProvider.TokenWithMeta refresh =
                 jwtTokenProvider.createRefreshToken(userPrincipal.getEmpId(), userPrincipal.getLoginId());
+        // [3-1] 강제 로그인을 위해 accessJti 추적용 정보를 redis에 저장
+        redisTokenStore.storeAccessJti(userPrincipal.getEmpId(), access.jti(), access.ttlSeconds());
+
         // [4] Refresh 토큰의 jti를 Redis에 저장 (TTL 포함)
         // - 재발급 시 "Redis에 존재하는 refresh jti"만 허용 → 로그아웃/강제로그아웃 시 즉시 무효화 가능
         redisTokenStore.storeRefresh(refresh.jti(), userPrincipal.getEmpId(), refresh.ttlSeconds());

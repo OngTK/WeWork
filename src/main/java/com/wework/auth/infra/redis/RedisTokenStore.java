@@ -48,6 +48,9 @@ public class RedisTokenStore {
     private static final String KEY_REFRESH_JTI = "refresh:";       // refresh: {jti}
     private static final String KEY_EMP_REFRESH = "emp_refresh:";   // emp_refresh: {empId}
 
+    // access jti 추적용 (강제 로그아웃 시 사용)
+    private static final String KEY_EMP_ACCESS = "emp_access:"; // emp_access:{empId} -> accessJti
+
     /* =========================================================
      *  Redis Key 생성 메서드
      * ========================================================= */
@@ -61,6 +64,7 @@ public class RedisTokenStore {
     private String blacklistKey(String jti) {
         return "auth:blacklist:" + jti;
     } // func end
+
 
     /* =========================================================
      *  Refresh Token 관리
@@ -172,6 +176,36 @@ public class RedisTokenStore {
             redisTemplate.delete(KEY_REFRESH_JTI + jti); // ★ 버그 수정됨
         }
     } // func end
+
+    /**
+     * 로그인 시 AccessJti 를 redis에 저장
+     * 관리자 계정은 empId를 가지고 일반 계정 로그아웃을 하기위해서는 별도의 토큰 정보를 확인할 방법이 필요
+     * */
+    public void storeAccessJti(long empId, String accessJti, long ttlSeconds) {
+        redisTemplate.opsForValue().set(KEY_EMP_ACCESS + empId, accessJti, ttlSeconds, TimeUnit.SECONDS);
+    } // func end
+
+    /**
+     * EmpId > accessJti를 찾아 블랙리스트에 등록
+     * */
+    public void blacklistAccessByEmpId(long empId) {
+
+        String accessJti = (String) redisTemplate.opsForValue().get(KEY_EMP_ACCESS + empId);
+        if (accessJti == null) return;
+
+        Long ttl = redisTemplate.getExpire(KEY_EMP_ACCESS + empId, TimeUnit.SECONDS);
+        if (ttl == null || ttl <= 0) {
+            // 만료 임박/만료면 블랙리스트 등록 의미 없음
+            redisTemplate.delete(KEY_EMP_ACCESS + empId);
+            return;
+        }
+
+        // 기존 구현 메서드 활용
+        blacklistAccess(accessJti, ttl);
+
+        // 추적 키 삭제(선택)
+        redisTemplate.delete(KEY_EMP_ACCESS + empId);
+    }
 
     /* =========================================================
      *  Access Token Blacklist 관리 (옵션)

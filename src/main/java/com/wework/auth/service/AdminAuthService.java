@@ -16,8 +16,11 @@ public class AdminAuthService {
      * @param empId 대상 사용자 사번
      * */
     public void forceLogout(long empId){
-        // 세션에 없더라도 예외 없이 삭제
+        // [1] 세션에 없더라도 예외 없이 refresh 삭제
         redisTokenStore.deleteRefreshByEmpId(empId);
+
+        // [2] access 블랙리스트 등록
+        redisTokenStore.blacklistAccessByEmpId(empId);
     } // func end
 
 } // class end
