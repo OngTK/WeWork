@@ -58,7 +58,7 @@ INSERT INTO employee
 VALUES
 ('admin', '$2a$10$EfZnMSBRBOjqInK2TgJSWuECPLti7jytBFYVSAj.pacE3Aq9B/Ani',   '최고관리자', '1985-02-14', 'M', 'admin@wework.local',   'ACTIVE', 200001, '대표'),
 -- origin : {bcrypt}$2a$10$sampleAdminHash / password : 1234!
-('mgr_hr',  '$2a$10$VbvNLQvaavuQ6PwpWDu.u.1VWkELNxSt9/NsYU.04w9TpmKzqyg7m',   '김지은',     '1990-06-01', 'F', 'j.kim@wework.local',   'ACTIVE', 200002, '부장'),
+('mgr_hr',  '$2a$10$VbvNLQvaavuQ6PwpWDu.u.1VWkELNxSt9/NsYU.04w9TpmKzqyg7m',   '김지은',     '1990-06-01', 'F', 'ongtest3@gmail.com',   'ACTIVE', 200002, '부장'),
 -- origin : {bcrypt}$2a$10$sampleMgrHash01 / password : testmgr!
 ('mgr_dev', '{bcrypt}$2a$10$sampleMgrHash02',   '박민수',     '1988-11-21', 'M', 'm.park@wework.local',  'ACTIVE', 200004, '이사'),
 ('mgr_sales','{bcrypt}$2a$10$sampleMgrHash03',  '이서준',     '1987-03-09', 'M', 's.lee@wework.local',   'ACTIVE', 200005, '부장'),

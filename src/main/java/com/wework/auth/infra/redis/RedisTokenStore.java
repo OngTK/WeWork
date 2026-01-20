@@ -271,4 +271,23 @@ public class RedisTokenStore {
         catch (Exception e) { return 0; }
     }
 
+    /* ===================================================================
+    *  AUTH_030~032 비밀번호 재설정 관련
+    *  =================================================================== */
+    private  String pwRestKey(String loginId){
+        return "auth:pw_reset:" + loginId ;
+    } // func end
+
+    public void storePwRestOtp(String loginId, String otp, long ttlSecondes){
+        redisTemplate.opsForValue().set(pwRestKey(loginId), otp, ttlSecondes, TimeUnit.SECONDS);
+    } // func end
+
+    public String getPwRestOtp(String loginId){
+        Object v = redisTemplate.opsForValue().get(pwRestKey(loginId));
+        return v == null ? null : String.valueOf(v);
+    } // func end
+
+    public void deletePwRestOtp(String loginId){
+        redisTemplate.delete(pwRestKey(loginId));
+    } // func end
 } // class end
