@@ -2,6 +2,7 @@ package com.wework.auth.api;
 
 import com.wework.auth.dto.request.ForceLogoutRequestDto;
 import com.wework.auth.dto.request.LockAccountRequestDto;
+import com.wework.auth.dto.request.UnlockAccountReequestDto;
 import com.wework.auth.service.AdminAuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,15 @@ public class AdminController {
     @PostMapping("/lock")
     public ResponseEntity<?> lockAccount(@Valid @RequestBody LockAccountRequestDto requestDto) throws NotFoundException {
         adminAuthService.lockAccount(requestDto.empId());
+        return ResponseEntity.ok().build();
+    } // func end
+
+    /**
+     * [AUTH_035] 계정 잠금 해제
+     * */
+    @PostMapping("/unlock")
+    public ResponseEntity<?> unlockAccount(@Valid @RequestBody UnlockAccountReequestDto requestDto) throws NotFoundException {
+        adminAuthService.unlockAccount(requestDto.empId());
         return ResponseEntity.ok().build();
     } // func end
 

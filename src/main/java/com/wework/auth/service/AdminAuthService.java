@@ -37,4 +37,15 @@ public class AdminAuthService {
                 .orElseThrow(() -> new NotFoundException("해당 empId를 찾을 수 없습니다."));
         employeeEntity.setStatus("INACTIVE"); // 상태 비활성화 = 퇴사
     } // func end
+
+    /**
+     * [AUTH_035] 계정 잠금 해제
+     * */
+    @Transactional
+    public void unlockAccount(long empId) throws NotFoundException {
+        EmployeeEntity employeeEntity = employeeRepository.findById(empId)
+                .orElseThrow(() -> new NotFoundException("해당 empId를 찾을 수 없습니다."));
+        employeeEntity.setStatus("ACTIVE");
+    } // func end
+
 } // class end
