@@ -1,9 +1,12 @@
 package com.wework.auth.service;
 
+import com.wework.auth.dto.request.PasswordResetOtpRequestDto;
 import com.wework.auth.dto.request.PasswordResetRequestDto;
+import com.wework.auth.dto.response.PasswordResetOtpResponseDto;
 import com.wework.auth.infra.redis.RedisTokenStore;
 import com.wework.employee.entity.EmployeeEntity;
 import com.wework.employee.repository.EmployeeRepository;
+import com.wework.global.exception.UnauthorizedException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -13,11 +16,13 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
-public class PasswordRestService {
+public class PasswordResetService {
 
     private final EmployeeRepository employeeRepository;
     private final RedisTokenStore redisTokenStore;
@@ -62,15 +67,41 @@ public class PasswordRestService {
         // [1] 회원 정보 조회
         EmployeeEntity employeeEntity = employeeRepository.findByLoginId(requestDto.loginId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 ID 입니다."));
-
         // [2] OTP 난수 생성
         String otp = generateOtp6();
-
         // [3] Redis 저장 (10min)
         redisTokenStore.storePwRestOtp(requestDto.loginId(), otp, 600);
-
         // [4] 이메일 발송
         setMail(employeeEntity.getEmail(),otp,600);
+    } // func end
+
+    /**
+     * [AUTH_031] 비밀번호 재설정 인증코드 검증
+     * - OTP 일치 시 resetToken 발급 및 Redis
+     * */
+    public PasswordResetOtpResponseDto verifyResetOtp(PasswordResetOtpRequestDto requestDto){
+        // [1] Redis에 저장된 OTP 조회
+        String savedOtp = redisTokenStore.getPwRestOtp(requestDto.loginId());
+        if(savedOtp == null) throw new UnauthorizedException("OTP가 존재하지 않거나 만료되었습니다.");
+        // [2] OTP 비교
+        if(!savedOtp.equals(requestDto.otp())) throw new UnauthorizedException("OTP가 일치하지 않습니다.");
+        // [3] OTP 삭제
+        redisTokenStore.deletePwRestOtp(requestDto.loginId());
+        // [4] resetToken 발급 + Redis 저장
+        String resetToken = generateResetToken();
+        long ttlSeconds = 600; // 10min
+        redisTokenStore.storePwStoreToken(requestDto.loginId(), resetToken, ttlSeconds);
+        // [5] 결과 반환
+        return new PasswordResetOtpResponseDto(requestDto.loginId(), ttlSeconds);
+    } // func end
+
+    /**
+     * [AUTH_031 내부 메소드] Token 발행용 내부 메소드
+     * */
+    private String generateResetToken() {
+        byte[] buf = new byte[32];
+        new SecureRandom().nextBytes(buf);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(buf);
     } // func end
 
 } // class end

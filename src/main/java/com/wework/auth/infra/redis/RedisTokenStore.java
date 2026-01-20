@@ -272,7 +272,7 @@ public class RedisTokenStore {
     }
 
     /* ===================================================================
-    *  AUTH_030~032 비밀번호 재설정 관련
+    *  AUTH_030 비밀번호 재설정 OTP > Redis 저장
     *  =================================================================== */
     private  String pwRestKey(String loginId){
         return "auth:pw_reset:" + loginId ;
@@ -290,4 +290,26 @@ public class RedisTokenStore {
     public void deletePwRestOtp(String loginId){
         redisTemplate.delete(pwRestKey(loginId));
     } // func end
+
+    /* ===================================================================
+     *  AUTH_031~032 비밀번호 재설정 OTP 인증 후
+     *  Token > redis 저장
+     *  =================================================================== */
+    public String pwRestTokenKey(String loginId){
+        return "auth:pw_reset_token:" + loginId;
+    } // func end
+
+    public void storePwStoreToken(String loginId, String resetToken, long ttlSeconds){
+        redisTemplate.opsForValue().set(pwRestTokenKey(loginId),resetToken,ttlSeconds,TimeUnit.SECONDS);
+    } // func end
+
+    public String getPwResetToken(String loginId){
+        Object v = redisTemplate.opsForValue().get(pwRestTokenKey(loginId));
+        return v == null ? null : String.valueOf(v);
+    } // func end
+
+    public void deletePwResetToken(String loginId){
+        redisTemplate.delete(pwRestTokenKey(loginId));
+    } // func end
+    
 } // class end
