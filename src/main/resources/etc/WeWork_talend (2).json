@@ -4,14 +4,14 @@
     {
       "entity": {
         "type": "Project",
-        "id": "703719ae-e081-4945-954b-b70ac111504c",
+        "id": "eb448091-5f3e-4263-92e9-cb62d58e5787",
         "name": "WeWork"
       },
       "children": [
         {
           "entity": {
             "type": "Service",
-            "id": "b8d62cf5-b0fe-4363-a8fc-7aba36dccfe8",
+            "id": "830a619f-2987-497a-922b-d68889b7919a",
             "name": "Account"
           },
           "children": [
@@ -42,13 +42,13 @@
                   "host": "localhost:8080",
                   "path": "/api/account/me"
                 },
-                "id": "32dab928-f72e-42c0-b0b0-19829ea6d231",
+                "id": "a527b54b-3978-492c-8d78-311cb6d0fcf1",
                 "name": "[ACCOUNT_001] 내 정보 조회",
                 "headers": [
                   {
                     "enabled": true,
                     "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzM4NCJ9.eyJqdGkiOiIwMzIxZGE4OC01ZjJhLTQyMDYtYWFlYi05NjUzYWI1NWQ4YjMiLCJzdWIiOiIxMDAwMDEiLCJsb2dpbklkIjoiYWRtaW4iLCJ0eXAiOiJhY2Nlc3MiLCJpYXQiOjE3NjgzNzQ1NTksImV4cCI6MTc2ODM3ODE1OX0.GJ_X8ePfZyTJYCCUER8hNfVsGeumFK0o28tB-kKnpJYi0zxPthRWTGJX2YFqy9l-"
+                    "value": "Bearer "
                   }
                 ]
               }
@@ -82,7 +82,7 @@
                   "host": "localhost:8080",
                   "path": "/api/account/me"
                 },
-                "id": "b7372628-bb6c-4ddf-b264-8de617931fab",
+                "id": "a35d21ad-6e7e-48ae-b196-2348a22e4efe",
                 "name": "[ACCOUNT_002] 내 정보 수정",
                 "headers": [
                   {
@@ -93,7 +93,7 @@
                   {
                     "enabled": true,
                     "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzM4NCJ9.eyJqdGkiOiJhM2MxNjhiNC05ZmI1LTRlZGItYWI3YS1mY2FlNTNlM2NiOTMiLCJzdWIiOiIxMDAwMDEiLCJsb2dpbklkIjoiYWRtaW4iLCJ0eXAiOiJhY2Nlc3MiLCJpYXQiOjE3NjgzNzI5MzMsImV4cCI6MTc2ODM3NjUzM30.io29ybgD6PblkcSkXudc78XPVGrq_aRZ-VSCMvred9sOEkCmQ1sEgOtCk0_0pTnA"
+                    "value": "Bearer "
                   }
                 ]
               }
@@ -127,7 +127,7 @@
                   "host": "localhost:8080",
                   "path": "/api/account/me/password"
                 },
-                "id": "04aa4864-b7c4-4c53-be84-74e39aa350ac",
+                "id": "62082bcc-de08-4dd7-80fa-d69f873f2bd6",
                 "name": "[ACCOUNT_003] 비밀번호 변경",
                 "headers": [
                   {
@@ -138,7 +138,7 @@
                   {
                     "enabled": true,
                     "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzM4NCJ9.eyJqdGkiOiJhM2MxNjhiNC05ZmI1LTRlZGItYWI3YS1mY2FlNTNlM2NiOTMiLCJzdWIiOiIxMDAwMDEiLCJsb2dpbklkIjoiYWRtaW4iLCJ0eXAiOiJhY2Nlc3MiLCJpYXQiOjE3NjgzNzI5MzMsImV4cCI6MTc2ODM3NjUzM30.io29ybgD6PblkcSkXudc78XPVGrq_aRZ-VSCMvred9sOEkCmQ1sEgOtCk0_0pTnA"
+                    "value": "Bearer "
                   }
                 ]
               }
@@ -170,13 +170,13 @@
                   "host": "localhost:8080",
                   "path": "/api/account/me/auth"
                 },
-                "id": "ae2fc0e3-824c-4ab5-8efd-ad704913f42e",
+                "id": "04165f6d-c1ea-41f6-b88c-bf2227ba4c12",
                 "name": "[ACCOUNT_004] 내 권한/역할/스코프 조회",
                 "headers": [
                   {
                     "enabled": true,
                     "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzM4NCJ9.eyJqdGkiOiIzZTIzYjI3ZS1iNTczLTRlZDItODU1NS1iOGUxY2E3NTY0OWMiLCJzdWIiOiIxMDAwMDIiLCJ0eXAiOiJhY2Nlc3MiLCJsb2dpbklkIjoibWdyX2hyIiwiaWF0IjoxNzY4MzEyMjE2LCJleHAiOjE3NjgzMTU4MTZ9.u9itzuTYIfb_Aj7buyQWTULD8gjUDs1YEI1NCJkur-iTR876gEK3Nu2hAZR1lAb0"
+                    "value": "Bearer "
                   }
                 ]
               }
@@ -187,7 +187,7 @@
           "entity": {
             "type": "Service",
             "description": "",
-            "id": "66bf2e08-d931-4596-92e7-508489d48156",
+            "id": "90765e8f-d72a-4189-a34f-7a2b17841149",
             "name": "Auth"
           },
           "children": [
@@ -220,7 +220,7 @@
                   "host": "localhost:8080",
                   "path": "/api/auth/signup"
                 },
-                "id": "cf1f3fa9-8b00-457c-a872-c7a05b8dbc5e",
+                "id": "9182da7f-5437-4701-9a83-7dfe8070536d",
                 "name": "[AUTH_001] 회원가입",
                 "headers": [
                   {
@@ -260,7 +260,7 @@
                   "host": "localhost:8080",
                   "path": "/api/auth/email"
                 },
-                "id": "265923ac-9f3e-42e6-8a32-b58e1eb92f68",
+                "id": "e9c8b2ea-67ac-4bb2-84e6-124cef278067",
                 "name": "[AUTH_002] 이메일 인증 코드 발송",
                 "headers": [
                   {
@@ -300,7 +300,7 @@
                   "host": "localhost:8080",
                   "path": "/api/auth/email/verify"
                 },
-                "id": "d8d0a21c-87df-44aa-b443-e23d564fd142",
+                "id": "0377e1e0-512a-40d2-9c61-2cbdb45ba90e",
                 "name": "[AUTH_003] 이메일 인증 코드 검증",
                 "headers": [
                   {
@@ -340,7 +340,7 @@
                   "host": "localhost:8080",
                   "path": "/api/auth/login"
                 },
-                "id": "d0e4323a-e92a-4ed9-adc5-9401ebe334eb",
+                "id": "09ac4168-9ad1-4e60-82da-8f6a4b28306d",
                 "name": "[AUTH_010] 로그인 / login",
                 "headers": [
                   {
@@ -379,7 +379,7 @@
                   "host": "localhost:8080",
                   "path": "/api/auth/logout"
                 },
-                "id": "2577a0b8-fbf8-4151-860b-482b346f8720",
+                "id": "d0550270-c59f-414f-8215-b5533eac2217",
                 "name": "[AUTH_011] 로그아웃",
                 "headers": [
                   {
@@ -418,7 +418,7 @@
                   "host": "localhost:8080",
                   "path": "/api/auth/token"
                 },
-                "id": "56eb736f-7421-4756-a251-3601ae84db9e",
+                "id": "91406af0-7f79-48e4-848a-6e07f263283a",
                 "name": "[AUTH_012] AccessToken 재발급",
                 "headers": [
                   {
@@ -458,18 +458,228 @@
                   "host": "localhost:8080",
                   "path": "/api/admin/auth/force-logout"
                 },
-                "id": "e2c292ec-2a07-46ee-afef-04b7846591e0",
+                "id": "ac2e6eb3-db3f-4e7c-9f70-5c726e477619",
                 "name": "[AUTH_013] 강제 로그아웃",
                 "headers": [
                   {
                     "enabled": true,
                     "name": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzM4NCJ9.eyJqdGkiOiIwZjEyMjc4Yy0yYWNlLTQ1YTUtYTRjZC0xN2M4YWMwNjk4YmEiLCJzdWIiOiIxMDAwMDEiLCJsb2dpbklkIjoiYWRtaW4iLCJ0eXAiOiJhY2Nlc3MiLCJpYXQiOjE3NjgyMDg3NzQsImV4cCI6MTc2ODIxMjM3NH0.KA_Fn15WAZZ15uYXTxnrVEpYvHQWA2z3CX130nRzp9iP-cTZwnaXkuLkh9r-tV-W"
+                    "value": "Bearer "
                   },
                   {
                     "enabled": true,
                     "name": "Content-Type",
                     "value": "application/json"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "requestBody": true,
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+                  "name": "POST"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n \"loginId\" :\"mgr_hr\" \n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "localhost:8080",
+                  "path": "/api/auth/password/reset"
+                },
+                "id": "37b66d3e-c998-4042-9801-49529f29d9f6",
+                "name": "[AUTH_030] 비밀번호 재설정 요청 (메일)",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "requestBody": true,
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+                  "name": "POST"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n  \"loginId\":\"mgr_hr\",\n  \"otp\":\"923255\"\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "localhost:8080",
+                  "path": "/api/auth/password/reset/verify"
+                },
+                "id": "d1214697-2f31-463d-afb1-25f89c989977",
+                "name": "[AUTH_031] 비밀번호 재설정 OTP 검증",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "requestBody": true,
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+                  "name": "POST"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n  \"loginId\":\"mgr_hr\",\n  \"resetToken\":\"KkVVgF3HVxBuglPMUeQqOwwwvTI_b5vFPSAZFfxaKBs\",\n  \"newPassword\":\"testtest1234!!\"\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "localhost:8080",
+                  "path": "/api/auth/password/reset/confirm"
+                },
+                "id": "abd87659-49b2-441a-a6e5-b9829b010f4c",
+                "name": "[AUTH_032] 비밀번호 재설정",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "requestBody": true,
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+                  "name": "POST"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n\"empId\": 100009\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "localhost:8080",
+                  "path": "/api/admin/auth/lock"
+                },
+                "id": "4d8fee31-5054-48aa-888e-493730e68c7e",
+                "name": "[AUTH_034] 계정 잠금 처리",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer "
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "requestBody": true,
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+                  "name": "POST"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n \"empId\": 100009\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "localhost:8080",
+                  "path": "/api/admin/auth/unlock"
+                },
+                "id": "3271b798-94ac-431a-a086-a94936a85cd9",
+                "name": "[AUTH_035] 계정 잠금 해제",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer "
                   }
                 ]
               }
