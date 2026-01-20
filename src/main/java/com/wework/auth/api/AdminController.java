@@ -5,6 +5,7 @@ import com.wework.auth.dto.request.LockAccountRequestDto;
 import com.wework.auth.service.AdminAuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,7 +35,9 @@ public class AdminController {
      * [AUTH_034] 계정 잠금(퇴사) 처리
      * */
     @PostMapping("/lock")
-    public ResponseEntity<?> lockAccount(@Valid @RequestBody LockAccountRequestDto requestDto){
-
+    public ResponseEntity<?> lockAccount(@Valid @RequestBody LockAccountRequestDto requestDto) throws NotFoundException {
+        adminAuthService.lockAccount(requestDto.empId());
+        return ResponseEntity.ok().build();
     } // func end
+
 } // class end
