@@ -1,14 +1,19 @@
 package com.wework.auth.service;
 
 import com.wework.auth.infra.redis.RedisTokenStore;
+import com.wework.employee.entity.EmployeeEntity;
+import com.wework.employee.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class AdminAuthService {
 
     private final RedisTokenStore redisTokenStore;
+    private final EmployeeRepository employeeRepository;
 
     /**
      * [AUTH_013] 강제 로그아웃
@@ -23,4 +28,13 @@ public class AdminAuthService {
         redisTokenStore.blacklistAccessByEmpId(empId);
     } // func end
 
+    /**
+     * [AUTH_034] 계정 잠금(퇴사) 처리
+     * */
+    @Transactional
+    public void lockAccount(long empId) throws NotFoundException {
+        EmployeeEntity employeeEntity = employeeRepository.findById(empId)
+                .orElseThrow(() -> new NotFoundException("해당 empId를 찾을 수 없습니다."));
+        employeeEntity.setStatus("INACTIVE"); // 상태 비활성화 = 퇴사
+    } // func end
 } // class end
