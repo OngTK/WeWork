@@ -2,7 +2,7 @@ package com.wework.auth.api;
 
 import com.wework.auth.dto.request.PasswordResetOtpRequestDto;
 import com.wework.auth.dto.request.PasswordResetRequestDto;
-import com.wework.auth.dto.response.PasswordResetOtpResponseDto;
+import com.wework.auth.dto.request.ResetPasswordRequestDto;
 import com.wework.auth.service.PasswordResetService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,4 +34,12 @@ public class PasswordResetController {
         return ResponseEntity.ok(passwordResetService.verifyResetOtp(requestDto));
     } // func end
 
+    /**
+     * [AUTH_032] 비밀번호 재설정
+     * */
+    @PostMapping("/confirm")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequestDto requestDto) throws NotFoundException {
+        passwordResetService.resetPassword(requestDto);
+        return ResponseEntity.ok().build();
+    }
 } // func end
