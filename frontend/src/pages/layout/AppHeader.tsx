@@ -75,7 +75,7 @@ export default function AppHeader() {
             {/* 아래 라인은 샘플처럼 "인사팀 · 사원" 형태를 만들고 싶으면 account에 dept/position이 있어야 합니다.
                없으면 roles를 간단히 노출하거나, 추후 me 응답에 deptName/position 추가 후 교체하세요. */}
             <Typography level="body-xs" sx={{ color: "neutral.500" }}>
-              {account.position ?? account.roles.join(", ")}
+              {account.deptName} | {account.position} 
             </Typography>
 
             <Stack direction="row" spacing={1} alignItems="center">

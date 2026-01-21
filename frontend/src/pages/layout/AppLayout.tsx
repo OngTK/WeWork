@@ -24,6 +24,8 @@ export default function AppLayout() {
           boxShadow: { xs: "none", md: "sm" },
           borderRadius: { xs: 0, md: 16 },
           overflow: "hidden",      // header border 등 깔끔하게
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <AppHeader />

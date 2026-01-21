@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/auth/LoginPage";
 import AppLayout from "./pages/layout/AppLayout";
-// import DashboardPage from "./pages/DashboardPage";
+import MyAccountPage from "./pages/account/MyAccountPage";
 import { AuthProvider, useAuth } from "./store/auth/AuthContext";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -32,9 +32,11 @@ export default function App() {
             {/* 근태관리 */}
             {/* 설비예약 */}
             {/* 통계/대시보드 */}
+                      <Route path="account/me" element={ <MyAccountPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
+
         </Routes>
       </BrowserRouter>
     </AuthProvider>

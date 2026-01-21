@@ -4,6 +4,7 @@ import { accountApi } from "../../api/accountApi";
 
 export type MyAccount = {
   empId: number;
+  loginId: string;
   name: string;
   deptName?: string;
   roles: string[];        // 예: ["SUPER_ADMIN", "MANAGER"]
@@ -11,7 +12,7 @@ export type MyAccount = {
   birthday?: string;
   email?: string;
   position?: string;
-  deptId?: number;
+  sex?: string;
 };
 
 type AuthState = {
