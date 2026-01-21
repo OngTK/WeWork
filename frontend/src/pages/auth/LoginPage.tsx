@@ -1,17 +1,30 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Button, Card, Divider, Input, Stack, Typography } from "@mui/joy";
 import { useAuth } from "../../store/auth/AuthContext";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated, isLoading } = useAuth();
 
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // 📌 이미 로그인 상태면 안내 후 홈으로 이동
+  useEffect(() => {
+    if (isLoading) return; // AuthProvider가 me() 확인 끝날 때까지 대기
+    if (isAuthenticated) {
+      // 0.8초 정도 멘트 보여주고 이동
+      const t = setTimeout(() => {
+        navigate("/", { replace: true });
+      }, 800);
+      return () => clearTimeout(t);
+    }
+  }, [isAuthenticated, isLoading, navigate]);
+
+  // 📌 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErrorMsg(null);
@@ -27,21 +40,49 @@ export default function LoginPage() {
     }
   }
 
+    // ✅ 추가: 로그인 상태면 Login UI 대신 안내 화면
+  if (!isLoading && isAuthenticated) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          width: "100vw",
+          backgroundColor: "#f6f7f9",
+          display: "grid",
+          placeItems: "center",
+          p: 2,
+        }}
+      >
+        <Card variant="outlined" sx={{ width: "min(520px, 96vw)", p: 3, borderRadius: 16 }}>
+          <Stack spacing={1.5} sx={{ textAlign: "center" }}>
+            <Typography level="h4">이미 로그인한 상태입니다.</Typography>
+            <Typography level="body-sm" sx={{ color: "neutral.500" }}>
+              잠시 후 메인 화면으로 이동합니다.
+            </Typography>
+            <Button onClick={() => navigate("/", { replace: true })}>지금 이동</Button>
+          </Stack>
+        </Card>
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{
         minHeight: "100vh",
-        display: "grid",
-        placeItems: "center",
+        width: "100vw",
         backgroundColor: "#f6f7f9",
-        p: 2,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
       <Card
         variant="outlined"
         sx={{
-          width: "min(1100px, 96vw)",
-          height: "min(560px, 90vh)",
+          width: "100%",
+          maxWidth: "1280px",   // ← 여기서만 최대폭 제어
+          height: { xs: "auto", md: 560 },
           borderRadius: 16,
           boxShadow: "sm",
           p: 3,

@@ -8,6 +8,10 @@ export type MyAccount = {
   deptName?: string;
   roles: string[];        // 예: ["SUPER_ADMIN", "MANAGER"]
   permissions?: string[]; // 예: ["AUTH.LOGIN", "ACCOUNT.READ", ...] 또는 CRUD코드
+  birthday?: string;
+  email?: string;
+  position?: string;
+  deptId?: number;
 };
 
 type AuthState = {

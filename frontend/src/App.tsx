@@ -4,11 +4,11 @@ import AppLayout from "./pages/layout/AppLayout";
 // import DashboardPage from "./pages/DashboardPage";
 import { AuthProvider, useAuth } from "./store/auth/AuthContext";
 
-function ProtectedRoute({ children }: { children: JSX.Element }) {
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   if (isLoading) return <div />; // 로딩 스켈레톤으로 바꿔도 됨
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  return children;
+  return <>{children}</>;
 }
 
 export default function App() {
