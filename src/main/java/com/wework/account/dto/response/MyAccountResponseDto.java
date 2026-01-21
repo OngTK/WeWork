@@ -24,5 +24,6 @@ public class MyAccountResponseDto {
     private String email;           // 이메일
     private String position;        // 직급
     private String deptName;        // 부서
+    private String sex;
 
 } // class end

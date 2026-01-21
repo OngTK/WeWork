@@ -24,7 +24,8 @@
             e.birthday    as birthday,
             e.email       as email,
             e.position    as position,
-            d.dept_name   as deptName
+            d.dept_name   as deptName,
+            e.sex         as sex
         from employee e
         join department d
             on e.dept_id = d.dept_id
