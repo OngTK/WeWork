@@ -6,6 +6,7 @@ import com.wework.account.dto.response.MyAccountResponseDto;
 import com.wework.account.dto.response.MyAuthResponseDto;
 import com.wework.account.mapper.AccountAuthMapper;
 import com.wework.employee.entity.EmployeeEntity;
+import com.wework.employee.mapper.EmployeeAuthMapper;
 import com.wework.employee.repository.EmployeeRepository;
 import com.wework.global.exception.ForbiddenException;
 import com.wework.global.security.UserPrincipal;
@@ -21,6 +22,7 @@ import java.util.List;
 public class AccountService {
 
     private final EmployeeRepository employeeRepository;
+    private final EmployeeAuthMapper employeeAuthMapper;
     private final AccountAuthMapper accountAuthMapper;
     private final PasswordEncoder passwordEncoder;
 
@@ -30,22 +32,14 @@ public class AccountService {
     public MyAccountResponseDto getMyProfile(UserPrincipal userPrincipal){
 
         // [1] 인증 주체의 empId로 직원 정보 조회
-        EmployeeEntity employeeEntity = employeeRepository.findById(userPrincipal.getEmpId())
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Employee not found"));
-
+        MyAccountResponseDto responseDto = employeeAuthMapper.selectEmployeeInfoToDeptNameByEmpId(userPrincipal.getEmpId());
         // [2] 권한 목록 추출
         List<String> roles = userPrincipal.getAuthorities().stream()
                 .map( a -> a.getAuthority())
                 .toList();
-
         // [3] 응답 DTO 구성
-        return MyAccountResponseDto.builder()
-                .empId(employeeEntity.getEmpId())
-                .loginId(employeeEntity.getLoginId())
-                .name(employeeEntity.getName())
-                .roles(roles)
-                .build();
+        responseDto.setRoles(roles);
+        return responseDto;
     } // [Account_001] func end
 
     /**

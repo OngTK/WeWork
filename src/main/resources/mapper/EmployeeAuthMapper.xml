@@ -15,4 +15,20 @@
         order by r.role_id
     </select>
 
+    <select id="selectEmployeeInfoToDeptNameByEmpId"
+            resultType="com.wework.account.dto.response.MyAccountResponseDto">
+        select
+            e.emp_id      as empId,
+            e.login_id    as loginId,
+            e.name        as name,
+            e.birthday    as birthday,
+            e.email       as email,
+            e.position    as position,
+            d.dept_name   as deptName
+        from employee e
+        join department d
+            on e.dept_id = d.dept_id
+        where e.emp_id = #{empId}
+    </select>
+
 </mapper>
