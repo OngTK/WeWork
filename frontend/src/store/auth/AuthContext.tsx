@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { authApi } from "../../api/authApi";
 import { accountApi } from "../../api/accountApi";
+import { useAppSnackbar } from "../../store/snackbar/SnackbarProvider";
 
 export type MyAccount = {
   empId: number;
@@ -33,6 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [account, setAccount] = useState<MyAccount | null>(null);
 
   const isAuthenticated = !!account;
+  const snackbar = useAppSnackbar();
 
   async function refreshMe() {
     const token = localStorage.getItem("accessToken");
@@ -56,6 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await authApi.logout();
     } finally {
       localStorage.removeItem("accessToken");
+      snackbar.success("로그아웃되었습니다.");
       setAccount(null);
     }
   }
