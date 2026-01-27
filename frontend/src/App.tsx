@@ -3,6 +3,7 @@ import LoginPage from "./pages/auth/LoginPage";
 import AppLayout from "./pages/layout/AppLayout";
 import MyAccountPage from "./pages/account/MyAccountPage";
 import { AuthProvider, useAuth } from "./store/auth/AuthContext";
+import { SnackbarProvider } from "./store/snackbar/SnackbarProvider";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -13,32 +14,36 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
+    <>
+      <SnackbarProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
 
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <AppLayout />
-              </ProtectedRoute>
-            }
-          >
-            {/* <Route index element={<DashboardPage />} /> */}
-            {/* 권한/직원관리 */}
-            {/* 문서/결재 */}
-            {/* 근태관리 */}
-            {/* 설비예약 */}
-            {/* 통계/대시보드 */}
-                      <Route path="account/me" element={ <MyAccountPage />} />
-          </Route>
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout />
+                  </ProtectedRoute>
+                }
+              >
+                {/* <Route index element={<DashboardPage />} /> */}
+                {/* 권한/직원관리 */}
+                {/* 문서/결재 */}
+                {/* 근태관리 */}
+                {/* 설비예약 */}
+                {/* 통계/대시보드 */}
+                <Route path="account/me" element={<MyAccountPage />} />
+              </Route>
 
-          <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
 
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </SnackbarProvider>
+    </>
   );
 }

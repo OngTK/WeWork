@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { Box, Button, Card, Divider, Input, Stack, Typography, Snackbar } from "@mui/joy";
+import { Box, Button, Card, Divider, Input, Stack, Typography } from "@mui/joy";
 import { useAuth } from "../../store/auth/AuthContext";
 import { accountApi } from "../../api/accountApi";
 import type { SexCode } from "../../store/auth/AuthContext"
 import { Select, Option } from "@mui/joy";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import { useAppSnackbar } from "../../store/snackbar/SnackbarProvider";
 
 type EditForm = {
     name: string;
@@ -17,8 +17,8 @@ export default function MyAccountPage() {
     const { account, refreshMe } = useAuth();
     const [editMode, setEditMode] = useState(false);
     const [saving, setSaving] = useState(false);
-    const [successOpen, setSuccessOpen] = useState(false);
-    const [successKey, setSuccessKey] = useState(0);
+
+    const snackbar = useAppSnackbar();
 
     const initialForm: EditForm = useMemo(
         () => ({
@@ -72,10 +72,9 @@ export default function MyAccountPage() {
             await refreshMe();
             setEditMode(false);
             // ✅ 성공 토스트 표시 (2초)
-            setSuccessKey((k) => k + 1);
-            setSuccessOpen(true);
+            snackbar.success("수정 성공했습니다.");
         } catch (e: any) {
-            alert("저장에 실패했습니다. 서버 로그/응답을 확인해주세요.");
+            snackbar.error("수정에 실패했습니다. 서버 로그/응답을 확인해주세요.");
         } finally {
             setSaving(false);
         }
@@ -103,7 +102,7 @@ export default function MyAccountPage() {
                         <Button
                             variant="outlined"
                             onClick={() => {
-                                alert("비밀번호 수정 기능은 추후 연결 예정입니다.");
+                                snackbar.warn("비밀번호 수정 기능은 추후 연결 예정입니다.");
                             }}
                         >
                             비밀번호 수정
@@ -200,25 +199,6 @@ export default function MyAccountPage() {
                     {/* roles는 표시하지 않음 (요구사항 반영) */}
                 </Card>
             </Box>
-            <Snackbar
-                key={successKey}
-                open={successOpen}
-                onClose={() => setSuccessOpen(false)}
-                autoHideDuration={2000}
-                anchorOrigin={{ vertical: "top", horizontal: "center" }}
-                variant="outlined"   // ✅ 핵심
-                color="primary"      // ✅ Joy 기본 파란색
-                sx={{
-                    borderWidth: 2,                 // 테두리 두께
-                    fontWeight: 600,
-                    backgroundColor: "white",       // 카드 느낌
-                }}
-            >
-                <Stack direction="row" spacing={1} alignItems="center">
-                    <CheckCircleOutlineIcon color="primary" />
-                    <span>수정 성공했습니다.</span>
-                </Stack>
-            </Snackbar>
         </>
     );
 }
