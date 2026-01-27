@@ -1,5 +1,6 @@
 import http from "./http";
-import type { MyAccount } from "../store/auth/AuthContext";
+import type { MyAccount, SexCode } from "../store/auth/AuthContext";
+
 
 export const accountApi = {
 
@@ -11,9 +12,12 @@ export const accountApi = {
 
   // 🍃 [ACCOUNT_002] 내 정보 수정 
   async updateMyInfo(
-    body: { name: string; 
-      birthday: string; 
-      email: string;}): 
+    body: {
+      name: string;
+      birthday: string;
+      email: string;
+      sex: SexCode;
+    }):
     Promise<void> {
     await http.put("/api/account/me", body);
   },

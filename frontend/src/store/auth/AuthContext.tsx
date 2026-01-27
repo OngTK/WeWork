@@ -12,8 +12,10 @@ export type MyAccount = {
   birthday?: string;
   email?: string;
   position?: string;
-  sex?: string;
+  sex?: SexCode;
 };
+
+export type SexCode = "M" | "F" | "O";
 
 type AuthState = {
   isLoading: boolean;

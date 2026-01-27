@@ -51,9 +51,12 @@ public class AccountService {
         // [1] 계정 entity 추출
         EmployeeEntity employeeEntity = employeeRepository.findById(empId)
                 .orElseThrow(() -> new IllegalStateException("유효하지 않은 사용자입니다."));
-        // [2] 이메일 중복 확인
-        if(employeeRepository.existsByEmail(requestDto.email())){
-            throw new IllegalStateException("이미 사용 중인 이메일입니다.");
+        // [2] 이메일이 변경된 경우에만 중복 체크
+        if (!employeeEntity.getEmail().equals(requestDto.email())) {
+            // [2] 다른 계정에서 사용 중인지 확인
+            if (employeeRepository.existsByEmail(requestDto.email())) {
+                throw new IllegalStateException("이미 사용 중인 이메일입니다.");
+            }
         }
         // [3] 정보 업데이트
         employeeEntity.setName(requestDto.name());

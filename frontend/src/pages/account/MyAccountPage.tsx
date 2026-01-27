@@ -1,24 +1,31 @@
 import { useEffect, useMemo, useState } from "react";
-import { Box, Button, Card, Divider, Input, Stack, Typography } from "@mui/joy";
+import { Box, Button, Card, Divider, Input, Stack, Typography, Snackbar } from "@mui/joy";
 import { useAuth } from "../../store/auth/AuthContext";
 import { accountApi } from "../../api/accountApi";
+import type { SexCode } from "../../store/auth/AuthContext"
+import { Select, Option } from "@mui/joy";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 
 type EditForm = {
     name: string;
     birthday: string;
     email: string;
+    sex: SexCode;
 };
 
 export default function MyAccountPage() {
     const { account, refreshMe } = useAuth();
     const [editMode, setEditMode] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [successOpen, setSuccessOpen] = useState(false);
+    const [successKey, setSuccessKey] = useState(0);
 
     const initialForm: EditForm = useMemo(
         () => ({
             name: account?.name ?? "",
             birthday: account?.birthday ?? "",
             email: account?.email ?? "",
+            sex: account?.sex ?? "O",
         }),
         [account]
     );
@@ -58,11 +65,15 @@ export default function MyAccountPage() {
                 name: form.name.trim(),
                 birthday: form.birthday,
                 email: form.email.trim(),
+                sex: form.sex,
             });
 
             // 저장 후 최신 내정보 재조회 → 헤더 등 즉시 반영
             await refreshMe();
             setEditMode(false);
+            // ✅ 성공 토스트 표시 (2초)
+            setSuccessKey((k) => k + 1);
+            setSuccessOpen(true);
         } catch (e: any) {
             alert("저장에 실패했습니다. 서버 로그/응답을 확인해주세요.");
         } finally {
@@ -70,103 +81,145 @@ export default function MyAccountPage() {
         }
     }
 
+    function sexLabel(sex?: SexCode) {
+        if (sex === "M") return "남자";
+        if (sex === "F") return "여자";
+        return "무관"; // undefined 포함
+    }
+
     return (
-        <Box sx={{ width: "95%", mx: "auto" }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                <Box>
-                    <Typography level="h3">내 정보 관리</Typography>
-                    <Typography level="body-sm" sx={{ color: "neutral.500", mt: 0.5 }}>
-                        내 정보를 확인하고 수정할 수 있습니다.
+        <>
+            <Box sx={{ width: "95%", mx: "auto" }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                    <Box>
+                        <Typography level="h3">내 정보 관리</Typography>
+                        <Typography level="body-sm" sx={{ color: "neutral.500", mt: 0.5 }}>
+                            내 정보를 확인하고 수정할 수 있습니다.
+                        </Typography>
+                    </Box>
+
+                    <Stack direction="row" spacing={1}>
+                        {/* 비밀번호 수정: 추후 모달/컴포넌트 연결용 */}
+                        <Button
+                            variant="outlined"
+                            onClick={() => {
+                                alert("비밀번호 수정 기능은 추후 연결 예정입니다.");
+                            }}
+                        >
+                            비밀번호 수정
+                        </Button>
+
+                        {!editMode ? (
+                            <Button onClick={startEdit}>수정하기</Button>
+                        ) : (
+                            <>
+                                <Button variant="outlined" onClick={cancelEdit} disabled={saving}>
+                                    취소
+                                </Button>
+                                <Button onClick={save} loading={saving}>
+                                    저장
+                                </Button>
+                            </>
+                        )}
+                    </Stack>
+                </Stack>
+
+                <Card variant="outlined" sx={{ borderRadius: 16, p: 2.5 }}>
+                    {/* 상단: 수정 불가 정보 */}
+                    <Typography level="title-md" sx={{ mb: 1 }}>
+                        기본 정보
                     </Typography>
-                </Box>
 
-                <Stack direction="row" spacing={1}>
-                    {/* 비밀번호 수정: 추후 모달/컴포넌트 연결용 */}
-                    <Button
-                        variant="outlined"
-                        onClick={() => {
-                            alert("비밀번호 수정 기능은 추후 연결 예정입니다.");
-                        }}
-                    >
-                        비밀번호 수정
-                    </Button>
+                    <Stack spacing={1.5}>
+                        <FieldRow label="사번(empId)">
+                            <Input value={String(account.empId)} readOnly />
+                        </FieldRow>
 
-                    {!editMode ? (
-                        <Button onClick={startEdit}>수정하기</Button>
-                    ) : (
-                        <>
-                            <Button variant="outlined" onClick={cancelEdit} disabled={saving}>
-                                취소
-                            </Button>
-                            <Button onClick={save} loading={saving}>
-                                저장
-                            </Button>
-                        </>
-                    )}
+                        <FieldRow label="아이디(loginId)">
+                            <Input value={account.loginId} readOnly />
+                        </FieldRow>
+
+                        <FieldRow label="직급(position)">
+                            <Input value={account.position ?? "-"} readOnly />
+                        </FieldRow>
+
+                        <FieldRow label="부서명(deptName)">
+                            <Input value={account.deptName ?? "-"} readOnly />
+                        </FieldRow>
+                    </Stack>
+
+                    <Divider sx={{ my: 2.5 }} />
+
+                    {/* 하단: 수정 가능 정보 */}
+                    <Typography level="title-md" sx={{ mb: 1 }}>
+                        수정 가능 정보
+                    </Typography>
+
+                    <Stack spacing={1.5}>
+                        <FieldRow label="이름(name)">
+                            <Input
+                                value={editMode ? form.name : account.name}
+                                readOnly={!editMode}
+                                onChange={(e) => onChange("name", e.target.value)}
+                            />
+                        </FieldRow>
+
+                        <FieldRow label="생년월일(birthday)">
+                            <Input
+                                type="date"
+                                value={editMode ? form.birthday : account.birthday ?? ""}
+                                readOnly={!editMode}
+                                onChange={(e) => onChange("birthday", e.target.value)}
+                            />
+                        </FieldRow>
+
+                        <FieldRow label="이메일(email)">
+                            <Input
+                                value={editMode ? form.email : account.email ?? ""}
+                                readOnly={!editMode}
+                                onChange={(e) => onChange("email", e.target.value)}
+                            />
+                        </FieldRow>
+                        <FieldRow label="성별(sex)">
+                            {editMode ? (
+                                <Select
+                                    value={form.sex}
+                                    onChange={(_, v) => v && onChange("sex", v)}
+                                    size="md"
+                                >
+                                    <Option value="M">남자</Option>
+                                    <Option value="F">여자</Option>
+                                    <Option value="O">무관</Option>
+                                </Select>
+                            ) : (
+                                <Input value={sexLabel(account.sex)} readOnly />
+                            )}
+                        </FieldRow>
+                    </Stack>
+
+                    {/* roles는 표시하지 않음 (요구사항 반영) */}
+                </Card>
+            </Box>
+            <Snackbar
+                key={successKey}
+                open={successOpen}
+                onClose={() => setSuccessOpen(false)}
+                autoHideDuration={2000}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                variant="outlined"   // ✅ 핵심
+                color="primary"      // ✅ Joy 기본 파란색
+                sx={{
+                    borderWidth: 2,                 // 테두리 두께
+                    fontWeight: 600,
+                    backgroundColor: "white",       // 카드 느낌
+                }}
+            >
+                <Stack direction="row" spacing={1} alignItems="center">
+                    <CheckCircleOutlineIcon color="primary" />
+                    <span>수정 성공했습니다.</span>
                 </Stack>
-            </Stack>
-
-            <Card variant="outlined" sx={{ borderRadius: 16, p: 2.5 }}>
-                {/* 상단: 수정 불가 정보 */}
-                <Typography level="title-md" sx={{ mb: 1 }}>
-                    기본 정보
-                </Typography>
-
-                <Stack spacing={1.5}>
-                    <FieldRow label="사번(empId)">
-                        <Input value={String(account.empId)} readOnly />
-                    </FieldRow>
-
-                    <FieldRow label="아이디(loginId)">
-                        <Input value={account.loginId} readOnly />
-                    </FieldRow>
-
-                    <FieldRow label="직급(position)">
-                        <Input value={account.position ?? "-"} readOnly />
-                    </FieldRow>
-
-                    <FieldRow label="부서명(deptName)">
-                        <Input value={account.deptName ?? "-"} readOnly />
-                    </FieldRow>
-                </Stack>
-
-                <Divider sx={{ my: 2.5 }} />
-
-                {/* 하단: 수정 가능 정보 */}
-                <Typography level="title-md" sx={{ mb: 1 }}>
-                    수정 가능 정보
-                </Typography>
-
-                <Stack spacing={1.5}>
-                    <FieldRow label="이름(name)">
-                        <Input
-                            value={editMode ? form.name : account.name}
-                            readOnly={!editMode}
-                            onChange={(e) => onChange("name", e.target.value)}
-                        />
-                    </FieldRow>
-
-                    <FieldRow label="생년월일(birthday)">
-                        <Input
-                            type="date"
-                            value={editMode ? form.birthday : account.birthday ?? ""}
-                            readOnly={!editMode}
-                            onChange={(e) => onChange("birthday", e.target.value)}
-                        />
-                    </FieldRow>
-
-                    <FieldRow label="이메일(email)">
-                        <Input
-                            value={editMode ? form.email : account.email ?? ""}
-                            readOnly={!editMode}
-                            onChange={(e) => onChange("email", e.target.value)}
-                        />
-                    </FieldRow>
-                </Stack>
-
-                {/* roles는 표시하지 않음 (요구사항 반영) */}
-            </Card>
-        </Box>
+            </Snackbar>
+        </>
     );
 }
 
