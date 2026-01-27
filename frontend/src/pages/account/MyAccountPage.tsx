@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Box, Button, Card, Divider, Input, Stack, Typography } from "@mui/joy";
+import { Box, Button, Card, colors, Divider, Input, Stack, Typography } from "@mui/joy";
 import { useAuth } from "../../store/auth/AuthContext";
 import { accountApi } from "../../api/accountApi";
 import type { SexCode } from "../../store/auth/AuthContext"
@@ -125,8 +125,20 @@ export default function MyAccountPage() {
 
                 <Card variant="outlined" sx={{ borderRadius: 16, p: 2.5 }}>
                     {/* 상단: 수정 불가 정보 */}
-                    <Typography level="title-md" sx={{ mb: 1 }}>
-                        기본 정보
+                    <Typography
+                        level="title-md"
+                        sx={{
+                            mb: 1,
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                        }}
+                    >
+                        <span>기본 정보</span>
+
+                        <span style={{ color: "#868686", fontSize: "0.8rem" }}>
+                            ※ 기본정보 수정은 관리자에게 문의하세요
+                        </span>
                     </Typography>
 
                     <Stack spacing={1.5}>
